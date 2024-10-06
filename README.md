@@ -24,7 +24,7 @@ bun test
 
 ## Todo
 
-- Declarative syntax: `startActivity.then(nextActivity).catch(catchActivity).then(lastActivity)`
+- Generate image of the workflow
 - Choice activity
 - Workflow linter: ensures the activity function inputs/outputs are typed safely
 - Expand README with more docs and examples

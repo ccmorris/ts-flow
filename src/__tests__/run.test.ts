@@ -6,18 +6,14 @@ import { log } from '../logger'
 describe('run', () => {
   test('should run the activities', async () => {
     const activityFn = mock().mockImplementation(
-      async (input: unknown, context: ActivityContext) => {
+      async (input: unknown, _context: ActivityContext) => {
         log('startActivityFn, input:', input)
-        context.success('startActivityFn')
+        return 'startActivityFn'
       }
     )
-    const activities: ActivityDefinitions = {
-      start: {
-        start: true,
-        fn: activityFn,
-        then: null,
-      },
-    }
+    const activities: ActivityDefinitions = [
+      { name: 'start', start: true, fn: activityFn, then: null },
+    ]
     const input = 'input'
 
     await run(activities, input)
@@ -28,28 +24,29 @@ describe('run', () => {
 
   test('runs with two activities', async () => {
     const startFn = mock().mockImplementation(
-      async (input: unknown, context: ActivityContext) => {
+      async (input: unknown, _context: ActivityContext) => {
         log('startActivityFn', input)
-        context.success('output from start activity')
+        return 'output from start activity'
       }
     )
     const endFn = mock().mockImplementation(
-      async (input: unknown, context: ActivityContext) => {
+      async (input: unknown, _context: ActivityContext) => {
         log('endActivityFn', input)
-        context.success(null)
       }
     )
-    const activities: ActivityDefinitions = {
-      start: {
+    const activities: ActivityDefinitions = [
+      {
+        name: 'start',
         start: true,
         fn: startFn,
         then: 'end',
       },
-      end: {
+      {
+        name: 'end',
         fn: endFn,
         then: null,
       },
-    }
+    ]
     const input = 'input'
 
     await run(activities, input)
@@ -70,23 +67,24 @@ describe('run', () => {
       }
     )
     const endFn = mock().mockImplementation(
-      async (input: unknown, context: ActivityContext) => {
+      async (input: unknown, _context: ActivityContext) => {
         log('endActivityFn', input)
-        context.success(null)
       }
     )
-    const activities: ActivityDefinitions = {
-      start: {
+    const activities: ActivityDefinitions = [
+      {
+        name: 'start',
         start: true,
         fn: startFn,
         then: null,
         catch: { timeout: { then: 'end' } },
       },
-      end: {
+      {
+        name: 'end',
         fn: endFn,
         then: null,
       },
-    }
+    ]
     const input = 'input'
 
     await run(activities, input)
@@ -104,23 +102,24 @@ describe('run', () => {
       }
     )
     const endFn = mock().mockImplementation(
-      async (input: unknown, context: ActivityContext) => {
+      async (input: unknown, _context: ActivityContext) => {
         log('endActivityFn', input)
-        context.success(null)
       }
     )
-    const activities: ActivityDefinitions = {
-      start: {
+    const activities: ActivityDefinitions = [
+      {
+        name: 'start',
         start: true,
         fn: startFn,
         then: null,
         catch: { 'Error: Timeout': { then: 'end' } },
       },
-      end: {
+      {
+        name: 'end',
         fn: endFn,
         then: null,
       },
-    }
+    ]
     const input = 'input'
 
     await run(activities, input)
@@ -141,23 +140,24 @@ describe('run', () => {
       }
     )
     const endFn = mock().mockImplementation(
-      async (input: unknown, context: ActivityContext) => {
+      async (input: unknown, _context: ActivityContext) => {
         log('endActivityFn', input)
-        context.success(null)
       }
     )
-    const activities: ActivityDefinitions = {
-      start: {
+    const activities: ActivityDefinitions = [
+      {
+        name: 'start',
         start: true,
         fn: startFn,
         then: null,
         catch: { 'Error: Timeout': { then: 'doesnotexist' } },
       },
-      end: {
+      {
+        name: 'end',
         fn: endFn,
         then: null,
       },
-    }
+    ]
     const input = 'input'
 
     await expect(run(activities, input)).rejects.toThrowError(
@@ -169,28 +169,24 @@ describe('run', () => {
 
   test('throws an error when the next activity does not exist', async () => {
     const startFn = mock().mockImplementation(
-      async (input: unknown, context: ActivityContext) => {
+      async (input: unknown, _context: ActivityContext) => {
         log('startActivityFn', input)
-        context.success('output from start activity')
+        return 'output from start activity'
       }
     )
     const endFn = mock().mockImplementation(
-      async (input: unknown, context: ActivityContext) => {
+      async (input: unknown, _context: ActivityContext) => {
         log('endActivityFn', input)
-        context.success(null)
       }
     )
-    const activities: ActivityDefinitions = {
-      start: {
-        start: true,
-        fn: startFn,
-        then: 'doesnotexist',
-      },
-      end: {
+    const activities: ActivityDefinitions = [
+      { name: 'start', start: true, fn: startFn, then: 'doesnotexist' },
+      {
+        name: 'end',
         fn: endFn,
         then: null,
       },
-    }
+    ]
     const input = 'input'
 
     await expect(run(activities, input)).rejects.toThrowError(
@@ -208,23 +204,24 @@ describe('run', () => {
       }
     )
     const endFn = mock().mockImplementation(
-      async (input: unknown, context: ActivityContext) => {
+      async (input: unknown, _context: ActivityContext) => {
         log('endActivityFn', input)
-        context.success(null)
       }
     )
-    const activities: ActivityDefinitions = {
-      start: {
+    const activities: ActivityDefinitions = [
+      {
+        name: 'start',
         start: true,
         fn: startFn,
         then: null,
         catch: { 'Error: Not Found': { then: 'end' } },
       },
-      end: {
+      {
+        name: 'end',
         fn: endFn,
         then: null,
       },
-    }
+    ]
     const input = 'input'
 
     await expect(run(activities, input)).rejects.toThrowError('Timeout')
@@ -240,23 +237,24 @@ describe('run', () => {
       }
     )
     const endFn = mock().mockImplementation(
-      async (input: unknown, context: ActivityContext) => {
+      async (input: unknown, _context: ActivityContext) => {
         log('endActivityFn', input)
-        context.success(null)
       }
     )
-    const activities: ActivityDefinitions = {
-      start: {
+    const activities: ActivityDefinitions = [
+      {
+        name: 'start',
         start: true,
         fn: startFn,
         then: null,
         catch: { 'Error: Not Found': { then: 'end' } },
       },
-      end: {
+      {
+        name: 'end',
         fn: endFn,
         then: null,
       },
-    }
+    ]
     const input = 'input'
 
     await expect(run(activities, input)).rejects.toThrowError('Timeout')
@@ -272,23 +270,24 @@ describe('run', () => {
       }
     )
     const endFn = mock().mockImplementation(
-      async (input: unknown, context: ActivityContext) => {
+      async (input: unknown, _context: ActivityContext) => {
         log('endActivityFn', input)
-        context.success(null)
       }
     )
-    const activities: ActivityDefinitions = {
-      start: {
+    const activities: ActivityDefinitions = [
+      {
+        name: 'start',
         start: true,
         fn: startFn,
         then: null,
         catch: { Timeout: { then: 'end' } },
       },
-      end: {
+      {
+        name: 'end',
         fn: endFn,
         then: null,
       },
-    }
+    ]
     const input = 'input'
 
     await expect(run(activities, input)).rejects.toThrowError(
@@ -306,22 +305,23 @@ describe('run', () => {
       }
     )
     const endFn = mock().mockImplementation(
-      async (input: unknown, context: ActivityContext) => {
+      async (input: unknown, _context: ActivityContext) => {
         log('endActivityFn', input)
-        context.success(null)
       }
     )
-    const activities: ActivityDefinitions = {
-      start: {
+    const activities: ActivityDefinitions = [
+      {
+        name: 'start',
         start: true,
         fn: startFn,
         then: null,
       },
-      end: {
+      {
+        name: 'end',
         fn: endFn,
         then: null,
       },
-    }
+    ]
     const input = 'input'
 
     await expect(run(activities, input)).rejects.toThrowError(
@@ -339,23 +339,24 @@ describe('run', () => {
       }
     )
     const endFn = mock().mockImplementation(
-      async (input: unknown, context: ActivityContext) => {
+      async (input: unknown, _context: ActivityContext) => {
         log('endActivityFn', input)
-        context.success(null)
       }
     )
-    const activities: ActivityDefinitions = {
-      start: {
+    const activities: ActivityDefinitions = [
+      {
+        name: 'start',
         start: true,
         fn: startFn,
         then: 'end',
         catch: { 'Not Found': { then: null } },
       },
-      end: {
+      {
+        name: 'end',
         fn: endFn,
         then: null,
       },
-    }
+    ]
     const input = 'input'
 
     await run(activities, input)

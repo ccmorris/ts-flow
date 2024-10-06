@@ -18,8 +18,10 @@ export const run = async <InitialInput>(
   let currentActivity = startActivity
   let currentInput: unknown = initialInput
   let isEnd = false
+  let isFail = false
 
   const successFn = (output: unknown) => {
+    if (isFail) return
     log('success', output)
     isEnd = currentActivity.then === null
     if (!currentActivity.then) {
@@ -27,7 +29,7 @@ export const run = async <InitialInput>(
       return
     }
 
-    const nextActivity = activities[currentActivity.then]
+    const nextActivity = activities.find((a) => a.name === currentActivity.then)
     if (!nextActivity) {
       throw new Error(`Activity with name '${currentActivity.then}' not found`)
     }
@@ -37,6 +39,7 @@ export const run = async <InitialInput>(
 
   const failFn = (error: unknown) => {
     log('fail', error)
+    isFail = true
     if (!currentActivity.catch) {
       isEnd = true
       if (error instanceof Error) throw error
@@ -57,7 +60,7 @@ export const run = async <InitialInput>(
       return
     }
 
-    const nextActivity = activities[catchActivity.then]
+    const nextActivity = activities.find((a) => a.name === catchActivity.then)
     if (!nextActivity) {
       throw new Error(`Activity with name '${catchActivity.then}' not found`)
     }
@@ -67,15 +70,17 @@ export const run = async <InitialInput>(
 
   while (currentActivity && !isEnd) {
     log('currentActivity:', currentActivity)
+    isFail = false
 
-    await currentActivity
+    const output = await currentActivity
       .fn(currentInput, {
-        success: successFn,
         fail: failFn,
       })
       .catch((error) => {
         log('Error caught in activity:', error)
         failFn(error)
       })
+
+    successFn(output)
   }
 }

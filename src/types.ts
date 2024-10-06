@@ -8,7 +8,6 @@ export type CatchDefinition = {
 }
 
 export type ActivityContext = {
-  success: (output: unknown) => void
   fail: (error: string) => void
 }
 
@@ -18,10 +17,11 @@ export type ActivityFunction = (
 ) => Promise<unknown> // TODO: more type safe input/output
 
 export type ActivityDefinition = {
+  name: string
   start?: true
   fn: ActivityFunction
   then: ActivityPointer | EndPointer
   catch?: CatchDefinition
 }
 
-export type ActivityDefinitions = Record<string, ActivityDefinition>
+export type ActivityDefinitions = ActivityDefinition[]
