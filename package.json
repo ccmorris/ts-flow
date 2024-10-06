@@ -1,0 +1,13 @@
+{
+  "name": "ts-flow",
+  "module": "src/index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.6.2"
+  },
+  "scripts": {
+    "build": "rm -rf dist && bun build src/index.ts --outdir dist --minify && tsc",
+    "test": "bun test"
+  }
+}
