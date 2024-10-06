@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "rm -rf dist && bun build src/index.ts --outdir dist --minify && tsc",
-    "test": "bun test"
+    "test": "bun test",
+    "type-check": "tsc --noEmit"
   }
 }
