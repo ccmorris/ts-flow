@@ -1,5 +1,6 @@
 import type { ActivityDefinitions, ActivityFunction, EndPointer } from './types'
 import { run } from './run'
+import { toMermaid } from './mermaid'
 
 export class Activity {
   name: string
@@ -59,6 +60,10 @@ export class Activity {
   public async run(initialInput: unknown) {
     if (!this.start) throw new Error('Activity must be a start activity')
     await run(this.toActivityDefinitions(), initialInput)
+  }
+
+  public toMermaid(): string {
+    return toMermaid(this.toActivityDefinitions())
   }
 }
 

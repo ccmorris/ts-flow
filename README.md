@@ -24,9 +24,13 @@ bun test
 
 ## Todo
 
-- Generate image of the workflow
 - Choice activity
 - Workflow linter: ensures the activity function inputs/outputs are typed safely
 - Expand README with more docs and examples
 - Publish package
 - Github Actions
+
+## Features
+
+- Declarative or imperative syntax
+- Generate an image for the workflow (via mermaid)
