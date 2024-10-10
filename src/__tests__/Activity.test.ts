@@ -40,16 +40,18 @@ describe('Activity class', () => {
 
     activity1.then(activity2).catch('error', activity3)
 
-    const activityDefinitions = activity1.toActivityDefinitions()
+    const taskDefinitions = activity1.toTaskDefinitions()
 
-    expect(activityDefinitions).toEqual([
+    expect(taskDefinitions).toEqual([
       {
+        type: 'activity',
         name: 'activity1',
         start: true,
         fn: activity1.fn,
         then: 'activity2',
       },
       {
+        type: 'activity',
         name: 'activity2',
         start: undefined,
         fn: activity2.fn,
@@ -57,6 +59,7 @@ describe('Activity class', () => {
         catch: { error: { then: 'activity3' } },
       },
       {
+        type: 'activity',
         name: 'activity3',
         start: undefined,
         fn: activity3.fn,

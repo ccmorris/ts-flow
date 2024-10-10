@@ -1,23 +1,48 @@
-import type { ActivityDefinitions } from './types'
+import type {
+  ActivityDefinition,
+  ChoiceDefinition,
+  TaskDefinitions,
+} from './types'
 
-export const toMermaid = (activities: ActivityDefinitions): string => {
+const formatTaskName = (name: string): string => name.replaceAll(' ', '_')
+
+export const toMermaid = (tasks: TaskDefinitions): string => {
   return `flowchart TD
     Start((start))-->
-    ${activities
-      .map((activity) => {
-        const next = activity.then
-          ? `-->|then|${activity.then}`
-          : '-->End((end))'
-        const catchConfig = activity.catch
-          ? Object.entries(activity.catch)
-              .map(([error, catchActivity]) => {
-                return `-->|catch ${error}|${catchActivity.then}`
-              })
-              .join('\n')
-          : ''
-        return `${activity.name}${next}${catchConfig}`
+    ${tasks
+      .map((task) => {
+        return task.type === 'activity'
+          ? activityToMermaid(task)
+          : choiceToMermaid(task)
       })
       .join('\n    ')}`
+}
+
+const activityToMermaid = (activity: ActivityDefinition): string => {
+  const next = activity.then
+    ? `-->|then|${formatTaskName(activity.then)}`
+    : '-->End((end))'
+  const catchConfig = activity.catch
+    ? Object.entries(activity.catch).map(([error, catchActivity]) => {
+        return `\n    ${formatTaskName(
+          activity.name
+        )}-->|catch ${formatTaskName(error)}|${formatTaskName(
+          catchActivity.then ?? 'End((end))'
+        )}`
+      })
+    : ''
+  return `${formatTaskName(activity.name)}${next}${catchConfig}`
+}
+
+const choiceToMermaid = (choice: ChoiceDefinition): string => {
+  return `${Object.entries(choice.choices)
+    .map(
+      ([key, target]) =>
+        `${formatTaskName(choice.name)}{${
+          choice.name
+        }}-->|${key}|${formatTaskName(target ?? 'End((end))')}`
+    )
+    .join('\n    ')}`
 }
 
 const encodeMermaidLiveState = (
@@ -37,13 +62,13 @@ const encodeMermaidLiveState = (
   return `base64:${base64Encoded}`
 }
 
-export const toMermaidLiveEdit = (activities: ActivityDefinitions): string => {
-  const mermaidString = toMermaid(activities)
+export const toMermaidLiveEdit = (tasks: TaskDefinitions): string => {
+  const mermaidString = toMermaid(tasks)
   const encodedState = encodeMermaidLiveState(mermaidString, 'dark')
   return `https://mermaid.live/edit#${encodedState}`
 }
-export const toMermaidPngUrl = (activities: ActivityDefinitions): string => {
-  const mermaidString = toMermaid(activities)
+export const toMermaidPngUrl = (tasks: TaskDefinitions): string => {
+  const mermaidString = toMermaid(tasks)
   const encodedState = encodeMermaidLiveState(mermaidString)
   return `https://mermaid.ink/img/${encodedState}?type=png`
 }

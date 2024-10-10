@@ -1,14 +1,13 @@
 import type { TaskDefinitions, ActivityFunction, EndPointer } from './types'
 import { run } from './run'
 import { toMermaid } from './mermaid'
-import type { Choice } from './Choice'
+import type { Activity } from './Activity'
 
-export class Activity {
+export class Choice {
   name: string
   start: boolean
   fn: ActivityFunction
-  next?: Activity | Choice | EndPointer
-  catchConfig?: { [key: string]: { then: Activity | Choice | EndPointer } }
+  choices: { [key: string]: Activity | Choice | EndPointer }
 
   public constructor(
     name: string,
@@ -18,40 +17,32 @@ export class Activity {
     this.name = name
     this.start = config.start ?? true
     this.fn = fn
+    this.choices = {}
   }
 
-  public then<T extends Activity | Choice>(next: T): T {
-    next.start = false
-    this.next = next
-    return next
-  }
-
-  public catch(error: string, next: Activity | Choice | EndPointer) {
-    if (next) next.start = false
-    this.catchConfig = { ...this.catchConfig, [error]: { then: next } }
+  public choice(name: string, next: Activity | Choice | EndPointer) {
+    this.choices = { ...this.choices, [name]: next }
     return this
   }
 
   public toTaskDefinitions(): TaskDefinitions {
     const tasks = [
       {
-        type: 'activity' as const,
+        type: 'choice' as const,
         name: this.name,
         start: this.start ? (true as const) : undefined,
         fn: this.fn,
-        then: this.next?.name ?? null,
-        catch: this.catchConfig
+        choices: this.choices
           ? Object.fromEntries(
-              Object.entries(this.catchConfig).map(([error, catchTask]) => {
-                return [error, { then: catchTask.then?.name ?? null }]
+              Object.entries(this.choices).map(([key, choiceTask]) => {
+                return [key, choiceTask?.name ?? null]
               })
             )
-          : undefined,
+          : {},
       },
-      ...(this.next ? this.next.toTaskDefinitions() : []),
-      ...(this.catchConfig
-        ? Object.values(this.catchConfig)
-            .map((catchTask) => catchTask.then?.toTaskDefinitions())
+      ...(this.choices
+        ? Object.values(this.choices)
+            .map((choice) => choice?.toTaskDefinitions())
             .filter((task) => !!task)
             .flat()
         : []),

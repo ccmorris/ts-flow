@@ -1,9 +1,9 @@
-export type ActivityPointer = string
+export type TaskPointer = string
 export type EndPointer = null
 
 export type CatchDefinition = {
   [key: string]: {
-    then: ActivityPointer | EndPointer
+    then: TaskPointer | EndPointer
   }
 }
 
@@ -17,11 +17,24 @@ export type ActivityFunction = (
 ) => Promise<unknown> // TODO: more type safe input/output
 
 export type ActivityDefinition = {
+  type: 'activity'
   name: string
   start?: true
   fn: ActivityFunction
-  then: ActivityPointer | EndPointer
+  then: TaskPointer | EndPointer
   catch?: CatchDefinition
 }
 
-export type ActivityDefinitions = ActivityDefinition[]
+export type ChoiceDefinition = {
+  type: 'choice'
+  name: string
+  start?: true
+  fn: ActivityFunction
+  choices: {
+    [key: string]: TaskPointer | EndPointer
+  }
+}
+
+export type TaskDefinition = ActivityDefinition | ChoiceDefinition
+
+export type TaskDefinitions = TaskDefinition[]

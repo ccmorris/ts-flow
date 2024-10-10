@@ -1,4 +1,4 @@
-import type { ActivityDefinitions } from './types'
+import type { TaskDefinitions } from './types'
 import { matchWithWildcards } from './catch-matcher'
 import { log } from './logger'
 
@@ -6,16 +6,14 @@ import { log } from './logger'
  * Run the workflow with an initial input
  */
 export const run = async <InitialInput>(
-  activities: ActivityDefinitions,
+  tasks: TaskDefinitions,
   initialInput: InitialInput
 ): Promise<void> => {
-  const startActivity = Object.values(activities).find(
-    (activity) => activity.start
-  )
-  if (!startActivity) throw new Error('No start activity found')
-  log('startActivity', startActivity)
+  const startTask = Object.values(tasks).find((task) => task.start)
+  if (!startTask) throw new Error('No start task found')
+  log('startTask', startTask)
 
-  let currentActivity = startActivity
+  let currentTask = startTask
   let currentInput: unknown = initialInput
   let isEnd = false
   let isFail = false
@@ -23,61 +21,66 @@ export const run = async <InitialInput>(
   const successFn = (output: unknown) => {
     if (isFail) return
     log('success', output)
-    isEnd = currentActivity.then === null
-    if (!currentActivity.then) {
+    if (currentTask.type === 'activity' && currentTask.then === null) {
       isEnd = true
       return
     }
 
-    const nextActivity = activities.find((a) => a.name === currentActivity.then)
-    if (!nextActivity) {
-      throw new Error(`Activity with name '${currentActivity.then}' not found`)
+    const nextTaskName =
+      currentTask.type === 'activity'
+        ? currentTask.then
+        : currentTask.choices[`${output}`]
+    const nextTask = tasks.find((task) => task.name === nextTaskName)
+    if (!nextTask) {
+      throw new Error(`Task with name '${nextTaskName}' not found`)
     }
-    currentActivity = nextActivity
-    currentInput = output
+    if (currentTask.type === 'activity') {
+      currentInput = output
+    }
+    currentTask = nextTask
   }
 
   const failFn = (error: unknown) => {
     log('fail', error)
     isFail = true
-    if (!currentActivity.catch) {
+    if (currentTask.type === 'choice' || !currentTask.catch) {
       isEnd = true
       if (error instanceof Error) throw error
-      throw new Error(`No catch activity found for error: ${error}`)
+      throw new Error(`No catch task found for error: ${error}`)
     }
 
-    const matchingCatch = Object.entries(currentActivity.catch).find(
+    const matchingCatch = Object.entries(currentTask.catch).find(
       ([catchPattern]) => matchWithWildcards(catchPattern, `${error}`)
     )
-    const catchActivity = matchingCatch && matchingCatch[1]
-    if (!catchActivity) {
+    const catchTask = matchingCatch && matchingCatch[1]
+    if (!catchTask) {
       log('No matching catch')
       if (error instanceof Error) throw error
       throw new Error(`No matching catch for error: ${error}`)
     }
-    if (catchActivity.then === null) {
+    if (catchTask.then === null) {
       isEnd = true
       return
     }
 
-    const nextActivity = activities.find((a) => a.name === catchActivity.then)
+    const nextActivity = tasks.find((a) => a.name === catchTask.then)
     if (!nextActivity) {
-      throw new Error(`Activity with name '${catchActivity.then}' not found`)
+      throw new Error(`Task with name '${catchTask.then}' not found`)
     }
-    currentActivity = nextActivity
+    currentTask = nextActivity
     currentInput = error
   }
 
-  while (currentActivity && !isEnd) {
-    log('currentActivity:', currentActivity)
+  while (currentTask && !isEnd) {
+    log('currentTask:', currentTask)
     isFail = false
 
-    const output = await currentActivity
+    const output = await currentTask
       .fn(currentInput, {
         fail: failFn,
       })
       .catch((error) => {
-        log('Error caught in activity:', error)
+        log('Error caught in task:', error)
         failFn(error)
       })
 

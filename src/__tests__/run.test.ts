@@ -1,22 +1,28 @@
 import { describe, expect, mock, test } from 'bun:test'
-import type { ActivityContext, ActivityDefinitions } from '../types'
+import type { ActivityContext, TaskDefinitions } from '../types'
 import { run } from '../run'
 import { log } from '../logger'
 
 describe('run', () => {
-  test('should run the activities', async () => {
+  test('should run the tasks', async () => {
     const activityFn = mock().mockImplementation(
       async (input: unknown, _context: ActivityContext) => {
         log('startActivityFn, input:', input)
         return 'startActivityFn'
       }
     )
-    const activities: ActivityDefinitions = [
-      { name: 'start', start: true, fn: activityFn, then: null },
+    const tasks: TaskDefinitions = [
+      {
+        type: 'activity',
+        name: 'start',
+        start: true,
+        fn: activityFn,
+        then: null,
+      },
     ]
     const input = 'input'
 
-    await run(activities, input)
+    await run(tasks, input)
 
     expect(activityFn).toHaveBeenCalledTimes(1)
     expect(activityFn).toHaveBeenCalledWith('input', expect.any(Object))
@@ -34,14 +40,16 @@ describe('run', () => {
         log('endActivityFn', input)
       }
     )
-    const activities: ActivityDefinitions = [
+    const tasks: TaskDefinitions = [
       {
+        type: 'activity',
         name: 'start',
         start: true,
         fn: startFn,
         then: 'end',
       },
       {
+        type: 'activity',
         name: 'end',
         fn: endFn,
         then: null,
@@ -49,7 +57,7 @@ describe('run', () => {
     ]
     const input = 'input'
 
-    await run(activities, input)
+    await run(tasks, input)
 
     expect(startFn).toHaveBeenCalledTimes(1)
     expect(endFn).toHaveBeenCalledTimes(1)
@@ -71,8 +79,9 @@ describe('run', () => {
         log('endActivityFn', input)
       }
     )
-    const activities: ActivityDefinitions = [
+    const tasks: TaskDefinitions = [
       {
+        type: 'activity',
         name: 'start',
         start: true,
         fn: startFn,
@@ -80,6 +89,7 @@ describe('run', () => {
         catch: { timeout: { then: 'end' } },
       },
       {
+        type: 'activity',
         name: 'end',
         fn: endFn,
         then: null,
@@ -87,7 +97,7 @@ describe('run', () => {
     ]
     const input = 'input'
 
-    await run(activities, input)
+    await run(tasks, input)
 
     expect(startFn).toHaveBeenCalledTimes(1)
     expect(endFn).toHaveBeenCalledTimes(1)
@@ -106,8 +116,9 @@ describe('run', () => {
         log('endActivityFn', input)
       }
     )
-    const activities: ActivityDefinitions = [
+    const tasks: TaskDefinitions = [
       {
+        type: 'activity',
         name: 'start',
         start: true,
         fn: startFn,
@@ -115,6 +126,7 @@ describe('run', () => {
         catch: { 'Error: Timeout': { then: 'end' } },
       },
       {
+        type: 'activity',
         name: 'end',
         fn: endFn,
         then: null,
@@ -122,7 +134,7 @@ describe('run', () => {
     ]
     const input = 'input'
 
-    await run(activities, input)
+    await run(tasks, input)
 
     expect(startFn).toHaveBeenCalledTimes(1)
     expect(endFn).toHaveBeenCalledTimes(1)
@@ -144,8 +156,9 @@ describe('run', () => {
         log('endActivityFn', input)
       }
     )
-    const activities: ActivityDefinitions = [
+    const tasks: TaskDefinitions = [
       {
+        type: 'activity',
         name: 'start',
         start: true,
         fn: startFn,
@@ -153,6 +166,7 @@ describe('run', () => {
         catch: { 'Error: Timeout': { then: 'doesnotexist' } },
       },
       {
+        type: 'activity',
         name: 'end',
         fn: endFn,
         then: null,
@@ -160,8 +174,8 @@ describe('run', () => {
     ]
     const input = 'input'
 
-    await expect(run(activities, input)).rejects.toThrowError(
-      "Activity with name 'doesnotexist' not found"
+    await expect(run(tasks, input)).rejects.toThrowError(
+      "Task with name 'doesnotexist' not found"
     )
 
     expect(startFn).toHaveBeenCalledTimes(1)
@@ -179,9 +193,16 @@ describe('run', () => {
         log('endActivityFn', input)
       }
     )
-    const activities: ActivityDefinitions = [
-      { name: 'start', start: true, fn: startFn, then: 'doesnotexist' },
+    const tasks: TaskDefinitions = [
       {
+        type: 'activity',
+        name: 'start',
+        start: true,
+        fn: startFn,
+        then: 'doesnotexist',
+      },
+      {
+        type: 'activity',
         name: 'end',
         fn: endFn,
         then: null,
@@ -189,8 +210,8 @@ describe('run', () => {
     ]
     const input = 'input'
 
-    await expect(run(activities, input)).rejects.toThrowError(
-      "Activity with name 'doesnotexist' not found"
+    await expect(run(tasks, input)).rejects.toThrowError(
+      "Task with name 'doesnotexist' not found"
     )
 
     expect(startFn).toHaveBeenCalledTimes(1)
@@ -208,8 +229,9 @@ describe('run', () => {
         log('endActivityFn', input)
       }
     )
-    const activities: ActivityDefinitions = [
+    const tasks: TaskDefinitions = [
       {
+        type: 'activity',
         name: 'start',
         start: true,
         fn: startFn,
@@ -217,6 +239,7 @@ describe('run', () => {
         catch: { 'Error: Not Found': { then: 'end' } },
       },
       {
+        type: 'activity',
         name: 'end',
         fn: endFn,
         then: null,
@@ -224,7 +247,7 @@ describe('run', () => {
     ]
     const input = 'input'
 
-    await expect(run(activities, input)).rejects.toThrowError('Timeout')
+    await expect(run(tasks, input)).rejects.toThrowError('Timeout')
 
     expect(startFn).toHaveBeenCalledTimes(1)
   })
@@ -241,8 +264,9 @@ describe('run', () => {
         log('endActivityFn', input)
       }
     )
-    const activities: ActivityDefinitions = [
+    const tasks: TaskDefinitions = [
       {
+        type: 'activity',
         name: 'start',
         start: true,
         fn: startFn,
@@ -250,6 +274,7 @@ describe('run', () => {
         catch: { 'Error: Not Found': { then: 'end' } },
       },
       {
+        type: 'activity',
         name: 'end',
         fn: endFn,
         then: null,
@@ -257,7 +282,7 @@ describe('run', () => {
     ]
     const input = 'input'
 
-    await expect(run(activities, input)).rejects.toThrowError('Timeout')
+    await expect(run(tasks, input)).rejects.toThrowError('Timeout')
 
     expect(startFn).toHaveBeenCalledTimes(1)
   })
@@ -274,8 +299,9 @@ describe('run', () => {
         log('endActivityFn', input)
       }
     )
-    const activities: ActivityDefinitions = [
+    const tasks: TaskDefinitions = [
       {
+        type: 'activity',
         name: 'start',
         start: true,
         fn: startFn,
@@ -283,6 +309,7 @@ describe('run', () => {
         catch: { Timeout: { then: 'end' } },
       },
       {
+        type: 'activity',
         name: 'end',
         fn: endFn,
         then: null,
@@ -290,7 +317,7 @@ describe('run', () => {
     ]
     const input = 'input'
 
-    await expect(run(activities, input)).rejects.toThrowError(
+    await expect(run(tasks, input)).rejects.toThrowError(
       'No matching catch for error: Not Found'
     )
 
@@ -309,14 +336,16 @@ describe('run', () => {
         log('endActivityFn', input)
       }
     )
-    const activities: ActivityDefinitions = [
+    const tasks: TaskDefinitions = [
       {
+        type: 'activity',
         name: 'start',
         start: true,
         fn: startFn,
         then: null,
       },
       {
+        type: 'activity',
         name: 'end',
         fn: endFn,
         then: null,
@@ -324,8 +353,8 @@ describe('run', () => {
     ]
     const input = 'input'
 
-    await expect(run(activities, input)).rejects.toThrowError(
-      'No catch activity found for error: Not Found'
+    await expect(run(tasks, input)).rejects.toThrowError(
+      'No catch task found for error: Not Found'
     )
 
     expect(startFn).toHaveBeenCalledTimes(1)
@@ -343,8 +372,9 @@ describe('run', () => {
         log('endActivityFn', input)
       }
     )
-    const activities: ActivityDefinitions = [
+    const tasks: TaskDefinitions = [
       {
+        type: 'activity',
         name: 'start',
         start: true,
         fn: startFn,
@@ -352,6 +382,7 @@ describe('run', () => {
         catch: { 'Not Found': { then: null } },
       },
       {
+        type: 'activity',
         name: 'end',
         fn: endFn,
         then: null,
@@ -359,9 +390,44 @@ describe('run', () => {
     ]
     const input = 'input'
 
-    await run(activities, input)
+    await run(tasks, input)
 
     expect(startFn).toHaveBeenCalledTimes(1)
     expect(endFn).toHaveBeenCalledTimes(0)
+  })
+
+  test('routes to a choice depending on the input', async () => {
+    const choiceFn = mock().mockImplementation(async (input) => {
+      log('choiceFn', input)
+      return 'choice1'
+    })
+    const activityFn = mock().mockImplementation(async (input) => {
+      log('endActivityFn', input)
+    })
+    const tasks: TaskDefinitions = [
+      {
+        type: 'choice',
+        name: 'choice',
+        start: true,
+        fn: choiceFn,
+        choices: {
+          choice1: 'end',
+          other: null,
+        },
+      },
+      {
+        type: 'activity',
+        name: 'end',
+        fn: activityFn,
+        then: null,
+      },
+    ]
+
+    await run(tasks, 'input')
+
+    expect(choiceFn).toHaveBeenCalledTimes(1)
+    expect(choiceFn).toHaveBeenCalledWith('input', expect.any(Object))
+    expect(activityFn).toHaveBeenCalledTimes(1)
+    expect(activityFn).toHaveBeenCalledWith('input', expect.any(Object))
   })
 })
