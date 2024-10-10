@@ -1,0 +1,32 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Choice class should convert to task definitions 1`] = `
+[
+  {
+    "choices": {
+      "decision1": "activity1",
+      "decision2": "activity2",
+    },
+    "fn": [Function: AsyncFunction],
+    "name": "id",
+    "start": true,
+    "type": "choice",
+  },
+  {
+    "catch": undefined,
+    "fn": [Function: AsyncFunction],
+    "name": "activity1",
+    "start": true,
+    "then": null,
+    "type": "activity",
+  },
+  {
+    "catch": undefined,
+    "fn": [Function: AsyncFunction],
+    "name": "activity2",
+    "start": true,
+    "then": null,
+    "type": "activity",
+  },
+]
+`;
