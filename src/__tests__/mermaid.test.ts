@@ -9,7 +9,6 @@ describe('toMermaid', () => {
       {
         type: 'activity',
         name: 'activity1',
-        start: true,
         fn: async () => {},
         then: 'activity2',
       },
@@ -36,7 +35,6 @@ describe('toMermaid', () => {
       {
         type: 'activity',
         name: 'activity1',
-        start: true,
         fn: async () => {},
         then: 'activity2',
         catch: { timeout: { then: 'timeout_handler' } },
@@ -74,7 +72,6 @@ describe('toMermaid', () => {
       {
         type: 'choice',
         name: 'choice task',
-        start: true,
         fn: async () => {},
         choices: { choice1: 'activity1', choice2: 'activity2' },
       },
@@ -122,7 +119,6 @@ describe('toMermaidLiveEdit', () => {
       {
         type: 'activity',
         name: 'activity1',
-        start: true,
         fn: async () => {},
         then: 'activity2',
         catch: { timeout: { then: 'timeout_handler' } },
@@ -155,7 +151,6 @@ describe('toMermaidPngUrl', () => {
       {
         type: 'activity',
         name: 'activity1',
-        start: true,
         fn: async () => {},
         then: 'activity2',
         catch: { timeout: { then: 'timeout_handler' } },

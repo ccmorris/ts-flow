@@ -15,7 +15,6 @@ describe('run', () => {
       {
         type: 'activity',
         name: 'start',
-        start: true,
         fn: activityFn,
         then: null,
       },
@@ -44,7 +43,6 @@ describe('run', () => {
       {
         type: 'activity',
         name: 'start',
-        start: true,
         fn: startFn,
         then: 'end',
       },
@@ -83,7 +81,6 @@ describe('run', () => {
       {
         type: 'activity',
         name: 'start',
-        start: true,
         fn: startFn,
         then: null,
         catch: { timeout: { then: 'end' } },
@@ -101,7 +98,10 @@ describe('run', () => {
 
     expect(startFn).toHaveBeenCalledTimes(1)
     expect(endFn).toHaveBeenCalledTimes(1)
-    expect(endFn).toHaveBeenCalledWith('timeout', expect.any(Object))
+    expect(endFn).toHaveBeenCalledWith(
+      { key: 'timeout', error: 'timeout' },
+      expect.any(Object)
+    )
   })
 
   test('catches errors and sends to the catch route', async () => {
@@ -120,7 +120,6 @@ describe('run', () => {
       {
         type: 'activity',
         name: 'start',
-        start: true,
         fn: startFn,
         then: null,
         catch: { 'Error: Timeout': { then: 'end' } },
@@ -139,7 +138,10 @@ describe('run', () => {
     expect(startFn).toHaveBeenCalledTimes(1)
     expect(endFn).toHaveBeenCalledTimes(1)
     expect(endFn).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'Error', message: 'Timeout' }),
+      {
+        key: 'Error: Timeout',
+        error: expect.objectContaining({ name: 'Error', message: 'Timeout' }),
+      },
       expect.any(Object)
     )
   })
@@ -160,7 +162,6 @@ describe('run', () => {
       {
         type: 'activity',
         name: 'start',
-        start: true,
         fn: startFn,
         then: null,
         catch: { 'Error: Timeout': { then: 'doesnotexist' } },
@@ -197,7 +198,6 @@ describe('run', () => {
       {
         type: 'activity',
         name: 'start',
-        start: true,
         fn: startFn,
         then: 'doesnotexist',
       },
@@ -233,7 +233,6 @@ describe('run', () => {
       {
         type: 'activity',
         name: 'start',
-        start: true,
         fn: startFn,
         then: null,
         catch: { 'Error: Not Found': { then: 'end' } },
@@ -268,7 +267,6 @@ describe('run', () => {
       {
         type: 'activity',
         name: 'start',
-        start: true,
         fn: startFn,
         then: null,
         catch: { 'Error: Not Found': { then: 'end' } },
@@ -303,7 +301,6 @@ describe('run', () => {
       {
         type: 'activity',
         name: 'start',
-        start: true,
         fn: startFn,
         then: null,
         catch: { Timeout: { then: 'end' } },
@@ -340,7 +337,6 @@ describe('run', () => {
       {
         type: 'activity',
         name: 'start',
-        start: true,
         fn: startFn,
         then: null,
       },
@@ -376,7 +372,6 @@ describe('run', () => {
       {
         type: 'activity',
         name: 'start',
-        start: true,
         fn: startFn,
         then: 'end',
         catch: { 'Not Found': { then: null } },
@@ -408,7 +403,7 @@ describe('run', () => {
       {
         type: 'choice',
         name: 'choice',
-        start: true,
+
         fn: choiceFn,
         choices: {
           choice1: 'end',

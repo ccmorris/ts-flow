@@ -1,36 +1,39 @@
 import { describe, expect, mock, test } from 'bun:test'
 
 import { Activity } from '../Activity'
+import { CatchInput } from '../types'
 
 describe('Activity class', () => {
   test('should create an activity', () => {
     const activity = new Activity('activity', async () => {})
 
     expect(activity.name).toBe('activity')
-    expect(activity.start).toBe(true)
     expect(activity.fn).toBeInstanceOf(Function)
   })
 
   test('should chain activities', () => {
-    const activity1 = new Activity('activity1', async () => {})
-    const activity2 = new Activity('activity2', async () => {})
-    const activity3 = new Activity('activity3', async () => {})
+    const activity1 = new Activity('activity1', async (_: '1') => '2' as const)
+    const activity2 = new Activity('activity2', async (_: '2') => '3' as const)
+    const activity3 = new Activity('activity3', async (_: '3') => '4' as const)
 
     activity1.then(activity2).then(activity3)
 
-    expect(activity1.next).toBe(activity2)
-    expect(activity2.next).toBe(activity3)
+    expect(activity1.next?.name).toBe(activity2.name)
+    expect(activity2.next?.name).toBe(activity3.name)
   })
 
   test('should chain activities with catch', () => {
-    const activity1 = new Activity('activity1', async () => {})
-    const activity2 = new Activity('activity2', async () => {})
-    const activity3 = new Activity('activity3', async () => {})
+    const activity1 = new Activity('activity1', async (_: '1') => '2' as const)
+    const activity2 = new Activity('activity2', async (_: '2') => '3' as const)
+    const activity3 = new Activity(
+      'activity3',
+      async (_: CatchInput<'error'>) => '4' as const
+    )
 
     activity1.then(activity2).catch('error', activity3)
 
-    expect(activity1.next).toBe(activity2)
-    expect(activity2.catchConfig).toEqual({ error: { then: activity3 } })
+    expect(activity1.next?.name).toBe(activity2.name)
+    expect(activity2.catchConfig).toEqual({ error: { then: activity3 as any } })
   })
 
   test('should convert to activity definitions', () => {
@@ -46,14 +49,12 @@ describe('Activity class', () => {
       {
         type: 'activity',
         name: 'activity1',
-        start: true,
         fn: activity1.fn,
         then: 'activity2',
       },
       {
         type: 'activity',
         name: 'activity2',
-        start: undefined,
         fn: activity2.fn,
         then: null,
         catch: { error: { then: 'activity3' } },
@@ -61,7 +62,6 @@ describe('Activity class', () => {
       {
         type: 'activity',
         name: 'activity3',
-        start: undefined,
         fn: activity3.fn,
         then: null,
       },
@@ -69,24 +69,37 @@ describe('Activity class', () => {
   })
 
   test('should run activities', async () => {
-    const fn1 = mock().mockResolvedValue('output from activity1')
-    const fn2 = mock().mockResolvedValue('output from activity2')
-    const fn3 = mock().mockResolvedValue('output from activity3')
-    const activity1 = new Activity('activity1', fn1)
-    const activity2 = new Activity('activity2', fn2)
-    const activity3 = new Activity('activity3', fn3)
+    const activity1 = new Activity(
+      'activity1',
+      mock().mockResolvedValue('output from activity1')
+    )
+    const activity2 = new Activity(
+      'activity2',
+      mock().mockRejectedValue('error')
+    )
+    const activity3 = new Activity(
+      'activity3',
+      mock().mockResolvedValue('output from activity3')
+    )
 
     activity1.then(activity2).catch('error', activity3)
 
     await activity1.run('initial input')
 
-    expect(fn1).toHaveBeenCalledTimes(1)
-    expect(fn1).toHaveBeenCalledWith('initial input', expect.any(Object))
-    expect(fn2).toHaveBeenCalledTimes(1)
-    expect(fn2).toHaveBeenCalledWith(
+    expect(activity1.fn).toHaveBeenCalledTimes(1)
+    expect(activity1.fn).toHaveBeenCalledWith(
+      'initial input',
+      expect.any(Object)
+    )
+    expect(activity2.fn).toHaveBeenCalledTimes(1)
+    expect(activity2.fn).toHaveBeenCalledWith(
       'output from activity1',
       expect.any(Object)
     )
-    expect(fn3).toHaveBeenCalledTimes(0)
+    expect(activity3.fn).toHaveBeenCalledTimes(1)
+    expect(activity3.fn).toHaveBeenCalledWith(
+      { key: 'error', error: 'error' },
+      expect.any(Object)
+    )
   })
 })

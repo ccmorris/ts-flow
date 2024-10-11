@@ -1,33 +1,43 @@
-import type { TaskDefinitions, ActivityFunction, EndPointer } from './types'
+import type {
+  TaskDefinitions,
+  ActivityFunction,
+  EndPointer,
+  CatchInput,
+} from './types'
 import { run } from './run'
 import { toMermaid } from './mermaid'
 import type { Choice } from './Choice'
 
-export class Activity {
+export class Activity<I, O> {
   name: string
-  start: boolean
-  fn: ActivityFunction
-  next?: Activity | Choice | EndPointer
-  catchConfig?: { [key: string]: { then: Activity | Choice | EndPointer } }
+  fn: ActivityFunction<I, O>
+  next?: Activity<O, unknown> | Choice<O, unknown> | EndPointer
+  catchConfig?: {
+    [key: string]: {
+      then:
+        | Activity<CatchInput<any>, unknown>
+        | Choice<CatchInput<any>, unknown>
+        | EndPointer
+    }
+  }
 
-  public constructor(
-    name: string,
-    fn: ActivityFunction,
-    config: { start?: true } = {}
-  ) {
+  public constructor(name: string, fn: ActivityFunction<I, O>) {
     this.name = name
-    this.start = config.start ?? true
     this.fn = fn
   }
 
-  public then<T extends Activity | Choice>(next: T): T {
-    next.start = false
+  public then<T extends Activity<O, any> | Choice<O, any>>(next: T): T {
     this.next = next
     return next
   }
 
-  public catch(error: string, next: Activity | Choice | EndPointer) {
-    if (next) next.start = false
+  public catch<CatchKey extends string>(
+    error: CatchKey,
+    next:
+      | Activity<CatchInput<CatchKey>, any>
+      | Choice<CatchInput<CatchKey>, any>
+      | EndPointer
+  ) {
     this.catchConfig = { ...this.catchConfig, [error]: { then: next } }
     return this
   }
@@ -37,7 +47,6 @@ export class Activity {
       {
         type: 'activity' as const,
         name: this.name,
-        start: this.start ? (true as const) : undefined,
         fn: this.fn,
         then: this.next?.name ?? null,
         catch: this.catchConfig
@@ -56,11 +65,10 @@ export class Activity {
             .flat()
         : []),
     ]
-    return removeDuplicateTasks(tasks)
+    return removeDuplicateTasks(tasks as TaskDefinitions)
   }
 
-  public async run(initialInput: unknown) {
-    if (!this.start) throw new Error('Task must be a start task')
+  public async run(initialInput: I) {
     await run(this.toTaskDefinitions(), initialInput)
   }
 

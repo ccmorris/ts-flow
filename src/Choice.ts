@@ -3,24 +3,23 @@ import { run } from './run'
 import { toMermaid } from './mermaid'
 import type { Activity } from './Activity'
 
-export class Choice {
+export class Choice<I, O> {
   name: string
-  start: boolean
-  fn: ActivityFunction
-  choices: { [key: string]: Activity | Choice | EndPointer }
+  fn: ActivityFunction<I, O>
+  choices: {
+    [key: string]: Activity<I, any> | Choice<I, any> | EndPointer
+  }
 
-  public constructor(
-    name: string,
-    fn: ActivityFunction,
-    config: { start?: true } = {}
-  ) {
+  public constructor(name: string, fn: ActivityFunction<I, O>) {
     this.name = name
-    this.start = config.start ?? true
     this.fn = fn
     this.choices = {}
   }
 
-  public choice(name: string, next: Activity | Choice | EndPointer) {
+  public choice(
+    name: string,
+    next: Activity<I, any> | Choice<I, any> | EndPointer
+  ) {
     this.choices = { ...this.choices, [name]: next }
     return this
   }
@@ -30,7 +29,6 @@ export class Choice {
       {
         type: 'choice' as const,
         name: this.name,
-        start: this.start ? (true as const) : undefined,
         fn: this.fn,
         choices: this.choices
           ? Object.fromEntries(
@@ -47,11 +45,10 @@ export class Choice {
             .flat()
         : []),
     ]
-    return removeDuplicateTasks(tasks)
+    return removeDuplicateTasks(tasks as TaskDefinitions)
   }
 
-  public async run(initialInput: unknown) {
-    if (!this.start) throw new Error('Task must be a start task')
+  public async run(initialInput: I) {
     await run(this.toTaskDefinitions(), initialInput)
   }
 

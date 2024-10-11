@@ -1,4 +1,4 @@
-import type { TaskDefinitions } from './types'
+import type { CatchInput, TaskDefinitions } from './types'
 import { matchWithWildcards } from './catch-matcher'
 import { log } from './logger'
 
@@ -9,7 +9,7 @@ export const run = async <InitialInput>(
   tasks: TaskDefinitions,
   initialInput: InitialInput
 ): Promise<void> => {
-  const startTask = Object.values(tasks).find((task) => task.start)
+  const startTask = Object.values(tasks)[0]
   if (!startTask) throw new Error('No start task found')
   log('startTask', startTask)
 
@@ -67,8 +67,13 @@ export const run = async <InitialInput>(
     if (!nextActivity) {
       throw new Error(`Task with name '${catchTask.then}' not found`)
     }
+
+    const catchInput: CatchInput<(typeof matchingCatch)[0]> = {
+      key: matchingCatch[0],
+      error,
+    }
     currentTask = nextActivity
-    currentInput = error
+    currentInput = catchInput
   }
 
   while (currentTask && !isEnd) {

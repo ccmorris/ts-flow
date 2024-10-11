@@ -1,14 +1,21 @@
 {
   "name": "ts-flow",
-  "module": "src/index.ts",
+  "version": "0.0.0",
+  "module": "dist/index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
     "typescript": "^5.6.3"
   },
   "scripts": {
-    "build": "rm -rf dist && bun build src/index.ts --outdir dist --minify && tsc",
+    "build": "bun build src/index.ts --outdir dist --minify && tsc",
     "test": "bun test",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "prepublishOnly": "rm -rf dist && bun run build"
   }
 }

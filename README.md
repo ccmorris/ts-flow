@@ -25,7 +25,6 @@ bun test
 ## Todo
 
 - Shared context data between tasks
-- Workflow linter: ensures the activity function inputs/outputs are typed safely
 - Expand README with more docs and examples
 - Publish package
 - Github Actions
@@ -33,6 +32,8 @@ bun test
 
 ## Features
 
+- Type safety for function inputs/outputs
 - Declarative or imperative syntax
 - Generate an image for the workflow (via mermaid)
 - Choice activities for more complex workflows
+- Zero dependencies

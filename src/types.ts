@@ -11,30 +11,35 @@ export type ActivityContext = {
   fail: (error: string) => void
 }
 
-export type ActivityFunction = (
-  input: unknown,
+export type ActivityFunction<I = unknown, O = unknown> = (
+  I: I,
   context: ActivityContext
-) => Promise<unknown> // TODO: more type safe input/output
+) => Promise<O>
 
-export type ActivityDefinition = {
+export type ActivityDefinition<I = unknown, O = unknown> = {
   type: 'activity'
   name: string
-  start?: true
-  fn: ActivityFunction
+  fn: ActivityFunction<I, O>
   then: TaskPointer | EndPointer
   catch?: CatchDefinition
 }
 
-export type ChoiceDefinition = {
+export type CatchInput<Key extends string> = {
+  key: Key
+  error: unknown
+}
+
+export type ChoiceDefinition<I = unknown, O = unknown> = {
   type: 'choice'
   name: string
-  start?: true
-  fn: ActivityFunction
+  fn: ActivityFunction<I, O>
   choices: {
     [key: string]: TaskPointer | EndPointer
   }
 }
 
-export type TaskDefinition = ActivityDefinition | ChoiceDefinition
+export type TaskDefinition<I = unknown, O = unknown> =
+  | ActivityDefinition<I, O>
+  | ChoiceDefinition<I, O>
 
 export type TaskDefinitions = TaskDefinition[]

@@ -8,19 +8,17 @@ describe('Choice class', () => {
     const choice = new Choice('id', async () => {})
 
     expect(choice.name).toBe('id')
-    expect(choice.start).toBe(true)
     expect(choice.fn).toBeInstanceOf(Function)
   })
 
   test('should chain choices', () => {
-    const activity1 = new Activity('activity1', async () => {})
-    const activity2 = new Activity('activity2', async () => {})
-    const choice = new Choice('id', async () => {})
+    const activity1 = new Activity('activity1', async (_: 'in') => {})
+    const activity2 = new Activity('activity2', async (_: 'in') => {})
+    const choice = new Choice('id', async (_: 'in') => {})
       .choice('decision1', activity1)
       .choice('decision2', activity2)
 
     expect(choice.name).toBe('id')
-    expect(choice.start).toBe(true)
     expect(choice.fn).toBeInstanceOf(Function)
     expect(choice.choices).toEqual({
       decision1: activity1,
