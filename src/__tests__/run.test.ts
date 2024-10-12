@@ -425,4 +425,36 @@ describe('run', () => {
     expect(activityFn).toHaveBeenCalledTimes(1)
     expect(activityFn).toHaveBeenCalledWith('input', expect.any(Object))
   })
+
+  test('context is shared between tasks', async () => {
+    const activity1Fn = mock().mockImplementation(async (input, context) => {
+      log('activity1Fn', { input, context })
+      expect(context.shared).toBe('initial')
+      context.shared = 'shared'
+      return input
+    })
+    const activity2Fn = mock().mockImplementation(async (input, context) => {
+      log('activity2Fn', { input, context })
+      expect(context.shared).toBe('shared')
+    })
+    const tasks: TaskDefinitions = [
+      {
+        type: 'activity',
+        name: 'activity1',
+        fn: activity1Fn,
+        then: 'activity2',
+      },
+      {
+        type: 'activity',
+        name: 'activity2',
+        fn: activity2Fn,
+        then: null,
+      },
+    ]
+
+    await run(tasks, 'input', { shared: 'initial' })
+
+    expect(activity1Fn).toHaveBeenCalledTimes(1)
+    expect(activity2Fn).toHaveBeenCalledTimes(1)
+  })
 })

@@ -1,4 +1,4 @@
-import type { CatchInput, TaskDefinitions } from './types'
+import type { ActivityContext, CatchInput, TaskDefinitions } from './types'
 import { matchWithWildcards } from './catch-matcher'
 import { log } from './logger'
 
@@ -7,7 +7,8 @@ import { log } from './logger'
  */
 export const run = async <InitialInput>(
   tasks: TaskDefinitions,
-  initialInput: InitialInput
+  initialInput: InitialInput,
+  initialContext: Record<string, unknown> = {}
 ): Promise<void> => {
   const startTask = Object.values(tasks)[0]
   if (!startTask) throw new Error('No start task found')
@@ -17,6 +18,7 @@ export const run = async <InitialInput>(
   let currentInput: unknown = initialInput
   let isEnd = false
   let isFail = false
+  const context = { ...initialContext }
 
   const successFn = (output: unknown) => {
     if (isFail) return
@@ -79,11 +81,10 @@ export const run = async <InitialInput>(
   while (currentTask && !isEnd) {
     log('currentTask:', currentTask)
     isFail = false
+    context['fail'] = failFn
 
     const output = await currentTask
-      .fn(currentInput, {
-        fail: failFn,
-      })
+      .fn(currentInput, context as ActivityContext)
       .catch((error) => {
         log('Error caught in task:', error)
         failFn(error)

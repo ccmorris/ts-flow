@@ -16,7 +16,7 @@ Install dependencies:
 bun install
 ```
 
-Run test:
+Run tests:
 
 ```bash
 bun test
@@ -24,11 +24,11 @@ bun test
 
 ## Todo
 
-- Shared context data between tasks
 - Expand README with more docs and examples
+- Expand comments and docstrings
 - Publish package
 - Github Actions
-- Plugin to store shared context data in a datastore
+- Improved type safety for context data
 
 ## Features
 
@@ -36,4 +36,5 @@ bun test
 - Declarative or imperative syntax
 - Generate an image for the workflow (via mermaid)
 - Choice activities for more complex workflows
+- Shared context data between tasks
 - Zero dependencies
