@@ -12,7 +12,7 @@ export type ActivityContext = {
 }
 
 export type ActivityFunction<I = unknown, O = unknown> = (
-  I: I,
+  input: I,
   context: ActivityContext
 ) => Promise<O>
 
