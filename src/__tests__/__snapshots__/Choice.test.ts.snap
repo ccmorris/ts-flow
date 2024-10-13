@@ -27,3 +27,42 @@ exports[`Choice class should convert to task definitions 1`] = `
   },
 ]
 `;
+
+exports[`Choice class should run the choices based on the output of the choice function 1`] = `
+{
+  "context": {},
+  "output": null,
+  "success": true,
+  "transitions": [
+    {
+      "nextInput": "initial input",
+      "nextTask": {
+        "choices": {
+          "decision1": "activity1",
+          "decision2": "activity2",
+        },
+        "fn": [class Function],
+        "name": "id",
+        "type": "choice",
+      },
+      "transitionName": "(start)",
+    },
+    {
+      "nextInput": "initial input",
+      "nextTask": {
+        "catch": undefined,
+        "fn": [class Function],
+        "name": "activity1",
+        "then": null,
+        "type": "activity",
+      },
+      "transitionName": "decision1",
+    },
+    {
+      "nextInput": undefined,
+      "nextTask": undefined,
+      "transitionName": "(end)",
+    },
+  ],
+}
+`;

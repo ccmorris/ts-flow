@@ -27,6 +27,32 @@ describe('run', () => {
     expect(activityFn).toHaveBeenCalledWith('input', expect.any(Object))
   })
 
+  test('should return a workflow result with transitions', async () => {
+    const activityFn = mock().mockImplementation(
+      async (input: unknown, _context: ActivityContext) => {
+        log('startActivityFn, input:', input)
+        return 'startActivityFn'
+      }
+    )
+    const tasks: TaskDefinitions = [
+      {
+        type: 'activity',
+        name: 'start',
+        fn: activityFn,
+        then: null,
+      },
+    ]
+    const input = 'input'
+
+    const result = await run(tasks, input)
+
+    expect(result.success).toBe(true)
+    expect(result.transitions).toEqual([
+      { transitionName: '(start)', nextTask: tasks[0], nextInput: input },
+      { transitionName: '(end)' },
+    ])
+  })
+
   test('runs with two activities', async () => {
     const startFn = mock().mockImplementation(
       async (input: unknown, _context: ActivityContext) => {
@@ -37,6 +63,7 @@ describe('run', () => {
     const endFn = mock().mockImplementation(
       async (input: unknown, _context: ActivityContext) => {
         log('endActivityFn', input)
+        return 'output2'
       }
     )
     const tasks: TaskDefinitions = [
@@ -55,7 +82,7 @@ describe('run', () => {
     ]
     const input = 'input'
 
-    await run(tasks, input)
+    const result = await run(tasks, input)
 
     expect(startFn).toHaveBeenCalledTimes(1)
     expect(endFn).toHaveBeenCalledTimes(1)
@@ -63,6 +90,17 @@ describe('run', () => {
       'output from start activity',
       expect.any(Object)
     )
+    expect(result.success).toBe(true)
+    expect(result.output).toBe('output2')
+    expect(result.transitions).toEqual([
+      { transitionName: '(start)', nextTask: tasks[0], nextInput: input },
+      {
+        transitionName: 'then',
+        nextTask: tasks[1],
+        nextInput: 'output from start activity',
+      },
+      { transitionName: '(end)' },
+    ])
   })
 
   test('matches a fail error and sends to the catch route', async () => {
@@ -448,9 +486,10 @@ describe('run', () => {
       },
     ]
 
-    await run(tasks, 'input', { shared: 'initial' })
+    const result = await run(tasks, 'input', { shared: 'initial' })
 
     expect(activity1Fn).toHaveBeenCalledTimes(1)
     expect(activity2Fn).toHaveBeenCalledTimes(1)
+    expect(result.context).toEqual({ shared: 'shared' })
   })
 })

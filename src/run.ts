@@ -3,6 +3,7 @@ import type {
   TaskDefinition,
   TaskDefinitions,
   Transition,
+  WorkflowResult,
 } from './types'
 import { matchWithWildcards } from './catch-matcher'
 import { log } from './logger'
@@ -14,7 +15,7 @@ export const run = async <InitialInput>(
   tasks: TaskDefinitions,
   initialInput: InitialInput,
   initialContext: Record<string, unknown> = {}
-): Promise<void> => {
+): Promise<WorkflowResult> => {
   const startTask = Object.values(tasks)[0]
   if (!startTask) throw new Error('No start task found')
   log('startTask', startTask)
@@ -39,15 +40,16 @@ export const run = async <InitialInput>(
     if (nextTask) currentTask = nextTask
     currentInput = nextInput
   }
-  const endTransition = () => {
+  const endTransition = (output?: unknown) => {
     makeTransition({ transitionName: '(end)' })
+    currentInput = output
     isEnd = true
   }
 
   const successFn = (output: unknown) => {
     log('success', output)
     if (currentTask.type === 'activity' && currentTask.then === null) {
-      endTransition()
+      endTransition(output)
       return
     }
 
@@ -83,7 +85,7 @@ export const run = async <InitialInput>(
     const transitionName = matchingCatch[0]
 
     if (catchTask.then === null) {
-      endTransition()
+      endTransition(error)
       return
     }
 
@@ -112,4 +114,5 @@ export const run = async <InitialInput>(
   }
 
   log('trace:', JSON.stringify(transitions))
+  return { success: true, transitions, output: currentInput, context }
 }

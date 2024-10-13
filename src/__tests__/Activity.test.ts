@@ -84,7 +84,7 @@ describe('Activity class', () => {
 
     activity1.then(activity2).catch('error', activity3)
 
-    await activity1.run('initial input')
+    const result = await activity1.run('initial input')
 
     expect(activity1.fn).toHaveBeenCalledTimes(1)
     expect(activity1.fn).toHaveBeenCalledWith(
@@ -101,5 +101,7 @@ describe('Activity class', () => {
       { key: 'error', error: 'error' },
       expect.any(Object)
     )
+
+    expect(result).toMatchSnapshot()
   })
 })

@@ -47,3 +47,10 @@ export type Transition = {
   nextTask?: TaskDefinition
   nextInput?: unknown
 }
+
+export type WorkflowResult = {
+  success: boolean
+  transitions: Transition[]
+  output: unknown
+  context: unknown
+}

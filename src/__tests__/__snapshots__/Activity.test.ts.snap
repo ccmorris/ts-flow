@@ -1,0 +1,56 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Activity class should run activities 1`] = `
+{
+  "context": {},
+  "output": "output from activity3",
+  "success": true,
+  "transitions": [
+    {
+      "nextInput": "initial input",
+      "nextTask": {
+        "catch": undefined,
+        "fn": [class Function],
+        "name": "activity1",
+        "then": "activity2",
+        "type": "activity",
+      },
+      "transitionName": "(start)",
+    },
+    {
+      "nextInput": "output from activity1",
+      "nextTask": {
+        "catch": {
+          "error": {
+            "then": "activity3",
+          },
+        },
+        "fn": [class Function],
+        "name": "activity2",
+        "then": null,
+        "type": "activity",
+      },
+      "transitionName": "then",
+    },
+    {
+      "nextInput": {
+        "error": "error",
+        "key": "error",
+      },
+      "nextTask": {
+        "catch": undefined,
+        "fn": [class Function],
+        "name": "activity3",
+        "then": null,
+        "type": "activity",
+      },
+      "transitionName": "error",
+    },
+    {
+      "nextInput": undefined,
+      "nextTask": undefined,
+      "transitionName": "(end)",
+    },
+  ],
+}
+`;

@@ -3,6 +3,7 @@ import type {
   ActivityFunction,
   EndPointer,
   CatchInput,
+  WorkflowResult,
 } from './types'
 import { run } from './run'
 import { toMermaid } from './mermaid'
@@ -68,8 +69,8 @@ export class Activity<I, O> {
     return removeDuplicateTasks(tasks as TaskDefinitions)
   }
 
-  public async run(initialInput: I) {
-    await run(this.toTaskDefinitions(), initialInput)
+  public async run(initialInput: I): Promise<WorkflowResult> {
+    return run(this.toTaskDefinitions(), initialInput)
   }
 
   public toMermaid(): string {

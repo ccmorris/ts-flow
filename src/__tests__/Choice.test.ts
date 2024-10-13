@@ -45,7 +45,7 @@ describe('Choice class', () => {
       .choice('decision1', activity1)
       .choice('decision2', activity2)
 
-    await choice.run('initial input')
+    const result = await choice.run('initial input')
 
     expect(choice.fn).toHaveBeenCalledTimes(1)
     expect(choice.fn).toHaveBeenCalledWith('initial input', expect.any(Object))
@@ -55,5 +55,6 @@ describe('Choice class', () => {
       expect.any(Object)
     )
     expect(activity2.fn).not.toHaveBeenCalled()
+    expect(result).toMatchSnapshot()
   })
 })
