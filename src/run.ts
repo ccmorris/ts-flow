@@ -1,4 +1,9 @@
-import type { ActivityContext, CatchInput, TaskDefinitions } from './types'
+import type {
+  CatchInput,
+  TaskDefinition,
+  TaskDefinitions,
+  Transition,
+} from './types'
 import { matchWithWildcards } from './catch-matcher'
 import { log } from './logger'
 
@@ -14,17 +19,35 @@ export const run = async <InitialInput>(
   if (!startTask) throw new Error('No start task found')
   log('startTask', startTask)
 
-  let currentTask = startTask
-  let currentInput: unknown = initialInput
+  let currentTask: TaskDefinition = startTask
+  let currentInput: unknown
   let isEnd = false
-  let isFail = false
+
   const context = { ...initialContext }
 
+  const transitions: Transition[] = []
+  const makeTransition = ({
+    transitionName,
+    nextTask,
+    nextInput,
+  }: {
+    transitionName: string
+    nextTask?: TaskDefinition
+    nextInput?: unknown
+  }) => {
+    transitions.push({ transitionName, nextTask, nextInput })
+    if (nextTask) currentTask = nextTask
+    currentInput = nextInput
+  }
+  const endTransition = () => {
+    makeTransition({ transitionName: '(end)' })
+    isEnd = true
+  }
+
   const successFn = (output: unknown) => {
-    if (isFail) return
     log('success', output)
     if (currentTask.type === 'activity' && currentTask.then === null) {
-      isEnd = true
+      endTransition()
       return
     }
 
@@ -32,22 +55,20 @@ export const run = async <InitialInput>(
       currentTask.type === 'activity'
         ? currentTask.then
         : currentTask.choices[`${output}`]
+    const transitionName =
+      currentTask.type === 'activity' ? 'then' : `${output}`
     const nextTask = tasks.find((task) => task.name === nextTaskName)
     if (!nextTask) {
       throw new Error(`Task with name '${nextTaskName}' not found`)
     }
-    if (currentTask.type === 'activity') {
-      currentInput = output
-    }
-    currentTask = nextTask
+    const nextInput = currentTask.type === 'activity' ? output : currentInput
+    makeTransition({ transitionName, nextTask, nextInput })
   }
 
   const failFn = (error: unknown) => {
     log('fail', error)
-    isFail = true
     if (currentTask.type === 'choice' || !currentTask.catch) {
       isEnd = true
-      if (error instanceof Error) throw error
       throw new Error(`No catch task found for error: ${error}`)
     }
 
@@ -57,39 +78,38 @@ export const run = async <InitialInput>(
     const catchTask = matchingCatch && matchingCatch[1]
     if (!catchTask) {
       log('No matching catch')
-      if (error instanceof Error) throw error
       throw new Error(`No matching catch for error: ${error}`)
     }
+    const transitionName = matchingCatch[0]
+
     if (catchTask.then === null) {
-      isEnd = true
+      endTransition()
       return
     }
 
-    const nextActivity = tasks.find((a) => a.name === catchTask.then)
-    if (!nextActivity) {
+    const nextTask = tasks.find((a) => a.name === catchTask.then)
+    if (!nextTask) {
       throw new Error(`Task with name '${catchTask.then}' not found`)
     }
 
-    const catchInput: CatchInput<(typeof matchingCatch)[0]> = {
+    const nextInput: CatchInput<(typeof matchingCatch)[0]> = {
       key: matchingCatch[0],
       error,
     }
-    currentTask = nextActivity
-    currentInput = catchInput
+
+    makeTransition({ transitionName, nextTask, nextInput })
   }
 
+  makeTransition({
+    transitionName: '(start)',
+    nextTask: startTask,
+    nextInput: initialInput,
+  })
   while (currentTask && !isEnd) {
     log('currentTask:', currentTask)
-    isFail = false
-    context['fail'] = failFn
 
-    const output = await currentTask
-      .fn(currentInput, context as ActivityContext)
-      .catch((error) => {
-        log('Error caught in task:', error)
-        failFn(error)
-      })
-
-    successFn(output)
+    await currentTask.fn(currentInput, context).then(successFn).catch(failFn)
   }
+
+  log('trace:', JSON.stringify(transitions))
 }

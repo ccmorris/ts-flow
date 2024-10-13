@@ -66,10 +66,11 @@ describe('run', () => {
   })
 
   test('matches a fail error and sends to the catch route', async () => {
+    const timeoutError = new Error('Timeout')
     const startFn = mock().mockImplementation(
-      async (input: unknown, context: ActivityContext) => {
+      async (input: unknown, _context: ActivityContext) => {
         log('startActivityFn', input)
-        context.fail('timeout')
+        throw timeoutError
       }
     )
     const endFn = mock().mockImplementation(
@@ -83,7 +84,7 @@ describe('run', () => {
         name: 'start',
         fn: startFn,
         then: null,
-        catch: { timeout: { then: 'end' } },
+        catch: { 'Error: Timeout': { then: 'end' } },
       },
       {
         type: 'activity',
@@ -99,7 +100,7 @@ describe('run', () => {
     expect(startFn).toHaveBeenCalledTimes(1)
     expect(endFn).toHaveBeenCalledTimes(1)
     expect(endFn).toHaveBeenCalledWith(
-      { key: 'timeout', error: 'timeout' },
+      { key: 'Error: Timeout', error: timeoutError },
       expect.any(Object)
     )
   })
@@ -253,9 +254,9 @@ describe('run', () => {
 
   test('throws a new error when the fail message is string no catch exists', async () => {
     const startFn = mock().mockImplementation(
-      async (input: unknown, context: ActivityContext) => {
+      async (input: unknown, _context: ActivityContext) => {
         log('startActivityFn', input)
-        context.fail('Timeout')
+        throw new Error('Timeout')
       }
     )
     const endFn = mock().mockImplementation(
@@ -269,7 +270,7 @@ describe('run', () => {
         name: 'start',
         fn: startFn,
         then: null,
-        catch: { 'Error: Not Found': { then: 'end' } },
+        catch: { 'Not Found': { then: 'end' } },
       },
       {
         type: 'activity',
@@ -286,12 +287,7 @@ describe('run', () => {
   })
 
   test('throws a new error when a fail message does not match any catch', async () => {
-    const startFn = mock().mockImplementation(
-      async (input: unknown, context: ActivityContext) => {
-        log('startActivityFn', input)
-        context.fail('Not Found')
-      }
-    )
+    const startFn = mock().mockRejectedValue(new Error('Not Found'))
     const endFn = mock().mockImplementation(
       async (input: unknown, _context: ActivityContext) => {
         log('endActivityFn', input)
@@ -315,7 +311,7 @@ describe('run', () => {
     const input = 'input'
 
     await expect(run(tasks, input)).rejects.toThrowError(
-      'No matching catch for error: Not Found'
+      'No matching catch for error: Error: Not Found'
     )
 
     expect(startFn).toHaveBeenCalledTimes(1)
@@ -323,9 +319,9 @@ describe('run', () => {
 
   test('throws a new error when a fail message has no catch', async () => {
     const startFn = mock().mockImplementation(
-      async (input: unknown, context: ActivityContext) => {
+      async (input: unknown, _context: ActivityContext) => {
         log('startActivityFn', input)
-        context.fail('Not Found')
+        throw new Error('Not Found')
       }
     )
     const endFn = mock().mockImplementation(
@@ -350,7 +346,7 @@ describe('run', () => {
     const input = 'input'
 
     await expect(run(tasks, input)).rejects.toThrowError(
-      'No catch task found for error: Not Found'
+      'No catch task found for error: Error: Not Found'
     )
 
     expect(startFn).toHaveBeenCalledTimes(1)
@@ -358,9 +354,9 @@ describe('run', () => {
 
   test('ends when the catch goes to end', async () => {
     const startFn = mock().mockImplementation(
-      async (input: unknown, context: ActivityContext) => {
+      async (input: unknown, _context: ActivityContext) => {
         log('startActivityFn', input)
-        context.fail('Not Found')
+        throw new Error('Timeout')
       }
     )
     const endFn = mock().mockImplementation(
@@ -374,7 +370,7 @@ describe('run', () => {
         name: 'start',
         fn: startFn,
         then: 'end',
-        catch: { 'Not Found': { then: null } },
+        catch: { 'Error: Timeout': { then: null } },
       },
       {
         type: 'activity',

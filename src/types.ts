@@ -7,9 +7,7 @@ export type CatchDefinition = {
   }
 }
 
-export type ActivityContext = {
-  fail: (error: string) => void
-}
+export type ActivityContext = Record<string, unknown>
 
 export type ActivityFunction<I = unknown, O = unknown> = (
   input: I,
@@ -43,3 +41,9 @@ export type TaskDefinition<I = unknown, O = unknown> =
   | ChoiceDefinition<I, O>
 
 export type TaskDefinitions = TaskDefinition[]
+
+export type Transition = {
+  transitionName: string
+  nextTask?: TaskDefinition
+  nextInput?: unknown
+}
