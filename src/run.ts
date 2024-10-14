@@ -20,7 +20,7 @@ export const run = async <InitialInput>(
   if (!startTask) throw new Error('No start task found')
   log('startTask', startTask)
 
-  let currentTask: TaskDefinition = startTask
+  let currentTask: TaskDefinition
   let currentInput: unknown
   let isEnd = false
 
@@ -36,12 +36,17 @@ export const run = async <InitialInput>(
     nextTask?: TaskDefinition
     nextInput?: unknown
   }) => {
-    transitions.push({ transitionName, nextTask, nextInput })
+    transitions.push({
+      transitionName,
+      nextInput,
+      from: currentTask ?? null,
+      to: nextTask ?? null,
+    })
     if (nextTask) currentTask = nextTask
     currentInput = nextInput
   }
   const endTransition = (output?: unknown) => {
-    makeTransition({ transitionName: '(end)' })
+    makeTransition({ transitionName: '(end)', nextInput: output })
     currentInput = output
     isEnd = true
   }
@@ -107,9 +112,9 @@ export const run = async <InitialInput>(
     nextTask: startTask,
     nextInput: initialInput,
   })
+  currentTask = startTask
   while (currentTask && !isEnd) {
-    log('currentTask:', currentTask)
-
+    log('currentTask:', currentTask.name)
     await currentTask.fn(currentInput, context).then(successFn).catch(failFn)
   }
 

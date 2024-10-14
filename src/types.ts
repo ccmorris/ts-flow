@@ -44,8 +44,9 @@ export type TaskDefinitions = TaskDefinition[]
 
 export type Transition = {
   transitionName: string
-  nextTask?: TaskDefinition
-  nextInput?: unknown
+  from: TaskDefinition | null
+  to: TaskDefinition | null
+  nextInput: unknown
 }
 
 export type WorkflowResult = {

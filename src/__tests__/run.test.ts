@@ -48,8 +48,13 @@ describe('run', () => {
 
     expect(result.success).toBe(true)
     expect(result.transitions).toEqual([
-      { transitionName: '(start)', nextTask: tasks[0], nextInput: input },
-      { transitionName: '(end)' },
+      { transitionName: '(start)', from: null, to: tasks[0], nextInput: input },
+      {
+        transitionName: '(end)',
+        from: tasks[0],
+        to: null,
+        nextInput: 'startActivityFn',
+      },
     ])
   })
 
@@ -93,13 +98,19 @@ describe('run', () => {
     expect(result.success).toBe(true)
     expect(result.output).toBe('output2')
     expect(result.transitions).toEqual([
-      { transitionName: '(start)', nextTask: tasks[0], nextInput: input },
+      { transitionName: '(start)', from: null, to: tasks[0], nextInput: input },
       {
         transitionName: 'then',
-        nextTask: tasks[1],
+        from: tasks[0],
+        to: tasks[1],
         nextInput: 'output from start activity',
       },
-      { transitionName: '(end)' },
+      {
+        transitionName: '(end)',
+        from: tasks[1],
+        to: null,
+        nextInput: 'output2',
+      },
     ])
   })
 

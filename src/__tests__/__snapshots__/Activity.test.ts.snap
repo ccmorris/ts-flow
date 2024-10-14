@@ -7,8 +7,9 @@ exports[`Activity class should run activities 1`] = `
   "success": true,
   "transitions": [
     {
+      "from": null,
       "nextInput": "initial input",
-      "nextTask": {
+      "to": {
         "catch": undefined,
         "fn": [class Function],
         "name": "activity1",
@@ -18,8 +19,15 @@ exports[`Activity class should run activities 1`] = `
       "transitionName": "(start)",
     },
     {
+      "from": {
+        "catch": undefined,
+        "fn": [class Function],
+        "name": "activity1",
+        "then": "activity2",
+        "type": "activity",
+      },
       "nextInput": "output from activity1",
-      "nextTask": {
+      "to": {
         "catch": {
           "error": {
             "then": "activity3",
@@ -33,11 +41,22 @@ exports[`Activity class should run activities 1`] = `
       "transitionName": "then",
     },
     {
+      "from": {
+        "catch": {
+          "error": {
+            "then": "activity3",
+          },
+        },
+        "fn": [class Function],
+        "name": "activity2",
+        "then": null,
+        "type": "activity",
+      },
       "nextInput": {
         "error": "error",
         "key": "error",
       },
-      "nextTask": {
+      "to": {
         "catch": undefined,
         "fn": [class Function],
         "name": "activity3",
@@ -47,8 +66,15 @@ exports[`Activity class should run activities 1`] = `
       "transitionName": "error",
     },
     {
-      "nextInput": undefined,
-      "nextTask": undefined,
+      "from": {
+        "catch": undefined,
+        "fn": [class Function],
+        "name": "activity3",
+        "then": null,
+        "type": "activity",
+      },
+      "nextInput": "output from activity3",
+      "to": null,
       "transitionName": "(end)",
     },
   ],
