@@ -360,7 +360,7 @@ describe('run', () => {
     const input = 'input'
 
     await expect(run(tasks, input)).rejects.toThrowError(
-      'No matching catch for error: Error: Not Found'
+      'Error thrown in workflow: Not Found'
     )
 
     expect(startFn).toHaveBeenCalledTimes(1)
@@ -395,7 +395,7 @@ describe('run', () => {
     const input = 'input'
 
     await expect(run(tasks, input)).rejects.toThrowError(
-      'No catch task found for error: Error: Not Found'
+      'Error thrown in workflow: Not Found'
     )
 
     expect(startFn).toHaveBeenCalledTimes(1)

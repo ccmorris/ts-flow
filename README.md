@@ -31,10 +31,8 @@ bun test
 - Github Actions
 - Improved type safety for context data: consider an input type generic from the run method and/or constructors
 - Debugging tools:
-  - Trace the steps that a workflow execution takes
-  - Visualize a workflow trace with an image (via mermaid diagram syntax)
-  - Wrap the errors to include additional details including step name and trace data, with toString toJson toObject
-  - Return a trace on successful workflows
+  - Trace the steps that a failed workflow execution takes
+  - Visualize a failed workflow trace with an image (via mermaid diagram syntax)
   - Measure the time for each task
 - Timeout handling
   - Set a max timeout value

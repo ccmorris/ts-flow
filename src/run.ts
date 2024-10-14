@@ -7,6 +7,7 @@ import type {
 } from './types'
 import { matchWithWildcards } from './catch-matcher'
 import { log } from './logger'
+import { WorkflowError } from './errors'
 
 /**
  * Run the workflow with an initial input
@@ -72,20 +73,29 @@ export const run = async <InitialInput>(
     makeTransition({ transitionName, nextTask, nextInput })
   }
 
-  const failFn = (error: unknown) => {
+  const failFn = (e: unknown) => {
+    const error = e instanceof Error ? e : new Error(`${e}`)
     log('fail', error)
+    const workflowError = new WorkflowError(
+      `Error thrown in workflow: ${error.message}`,
+      error,
+      { success: false, transitions, output: error, context },
+      tasks
+    )
     if (currentTask.type === 'choice' || !currentTask.catch) {
       isEnd = true
-      throw new Error(`No catch task found for error: ${error}`)
+      throw workflowError
     }
 
     const matchingCatch = Object.entries(currentTask.catch).find(
-      ([catchPattern]) => matchWithWildcards(catchPattern, `${error}`)
+      ([catchPattern]) =>
+        matchWithWildcards(catchPattern, `${e}`) ||
+        matchWithWildcards(catchPattern, error.message)
     )
     const catchTask = matchingCatch && matchingCatch[1]
     if (!catchTask) {
       log('No matching catch')
-      throw new Error(`No matching catch for error: ${error}`)
+      throw workflowError
     }
     const transitionName = matchingCatch[0]
 
@@ -96,7 +106,15 @@ export const run = async <InitialInput>(
 
     const nextTask = tasks.find((a) => a.name === catchTask.then)
     if (!nextTask) {
-      throw new Error(`Task with name '${catchTask.then}' not found`)
+      const notFoundError = new Error(
+        `Task with name '${catchTask.then}' not found`
+      )
+      throw new WorkflowError(
+        `Task with name '${catchTask.then}' not found`,
+        notFoundError,
+        { success: false, transitions, output: notFoundError, context },
+        tasks
+      )
     }
 
     const nextInput: CatchInput<(typeof matchingCatch)[0]> = {

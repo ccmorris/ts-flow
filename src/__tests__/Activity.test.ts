@@ -75,14 +75,14 @@ describe('Activity class', () => {
     )
     const activity2 = new Activity(
       'activity2',
-      mock().mockRejectedValue('error')
+      mock().mockRejectedValue(new Error('Timeout'))
     )
     const activity3 = new Activity(
       'activity3',
       mock().mockResolvedValue('output from activity3')
     )
 
-    activity1.then(activity2).catch('error', activity3)
+    activity1.then(activity2).catch('Timeout', activity3)
 
     const result = await activity1.run('initial input')
 
@@ -98,7 +98,7 @@ describe('Activity class', () => {
     )
     expect(activity3.fn).toHaveBeenCalledTimes(1)
     expect(activity3.fn).toHaveBeenCalledWith(
-      { key: 'error', error: 'error' },
+      expect.objectContaining({ key: 'Timeout', error: expect.any(Error) }),
       expect.any(Object)
     )
 

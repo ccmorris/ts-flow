@@ -29,7 +29,7 @@ exports[`Activity class should run activities 1`] = `
       "nextInput": "output from activity1",
       "to": {
         "catch": {
-          "error": {
+          "Timeout": {
             "then": "activity3",
           },
         },
@@ -43,7 +43,7 @@ exports[`Activity class should run activities 1`] = `
     {
       "from": {
         "catch": {
-          "error": {
+          "Timeout": {
             "then": "activity3",
           },
         },
@@ -53,8 +53,8 @@ exports[`Activity class should run activities 1`] = `
         "type": "activity",
       },
       "nextInput": {
-        "error": "error",
-        "key": "error",
+        "error": [Error: Timeout],
+        "key": "Timeout",
       },
       "to": {
         "catch": undefined,
@@ -63,7 +63,7 @@ exports[`Activity class should run activities 1`] = `
         "then": null,
         "type": "activity",
       },
-      "transitionName": "error",
+      "transitionName": "Timeout",
     },
     {
       "from": {
