@@ -30,10 +30,7 @@ bun test
 - Publish package
 - Github Actions
 - Improved type safety for context data: consider an input type generic from the run method and/or constructors
-- Debugging tools:
-  - Trace the steps that a failed workflow execution takes
-  - Visualize a failed workflow trace with an image (via mermaid diagram syntax)
-  - Measure the time for each task
+- Measure the time for each task
 - Timeout handling
   - Set a max timeout value
   - Cancellable tasks using an AbortSignal?
@@ -43,6 +40,7 @@ bun test
 - Type safety for function inputs/outputs
 - Declarative or imperative syntax
 - Generate an image for the workflow (via mermaid diagram syntax)
+- Generate an image for a traced workflow to show the path taken
 - Choice activities for more complex workflow decisions
 - Shared context data between tasks
 - Zero dependencies

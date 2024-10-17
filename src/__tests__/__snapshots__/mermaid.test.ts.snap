@@ -46,6 +46,21 @@ exports[`toMermaid should style the traced tasks green 1`] = `
     classDef traced fill:green,stroke-width:4px;"
 `;
 
+exports[`toMermaid should style a failed task red 1`] = `
+"flowchart TD
+    Start((start)):::traced==>
+    choice_task{choice task}:::traced==>|choice1|activity1
+    choice_task{choice task}:::traced-->|choice2|activity2
+    activity1[activity1]:::traced==>|then|activity2
+    activity1-->|catch timeout|timeout_handler
+    activity2[activity2]:::failed-->|then|activity3
+    activity2-->|catch timeout|timeout_handler
+    activity3[activity3]-->|then|End((end))
+    timeout_handler[timeout_handler]-->|then|End((end))
+    classDef traced fill:green,stroke-width:4px;
+    classDef failed fill:#cc0000,stroke-width:4px;"
+`;
+
 exports[`toMermaidLiveEdit should generate a URL to edit a mermaid diagram 1`] = `"https://mermaid.live/edit#base64:eyJjb2RlIjoiZmxvd2NoYXJ0IFREXG4gICAgU3RhcnQoKHN0YXJ0KSktLT5cbiAgICBhY3Rpdml0eTFbYWN0aXZpdHkxXS0tPnx0aGVufGFjdGl2aXR5MlxuICAgIGFjdGl2aXR5MS0tPnxjYXRjaCB0aW1lb3V0fHRpbWVvdXRfaGFuZGxlclxuICAgIGFjdGl2aXR5MlthY3Rpdml0eTJdLS0+fHRoZW58YWN0aXZpdHkzXG4gICAgYWN0aXZpdHkyLS0+fGNhdGNoIHRpbWVvdXR8dGltZW91dF9oYW5kbGVyXG4gICAgYWN0aXZpdHkzW2FjdGl2aXR5M10tLT58dGhlbnxFbmQoKGVuZCkpXG4gICAgdGltZW91dF9oYW5kbGVyW3RpbWVvdXRfaGFuZGxlcl0tLT58dGhlbnxFbmQoKGVuZCkpIiwibWVybWFpZCI6IntcInRoZW1lXCI6XCJkYXJrXCJ9IiwiYXV0b1N5bmMiOnRydWUsInJvdWdoIjpmYWxzZSwidXBkYXRlRGlhZ3JhbSI6dHJ1ZX0="`;
 
 exports[`toMermaidPngUrl should generate a URL to a mermaid diagram PNG 1`] = `"https://mermaid.ink/img/base64:eyJjb2RlIjoiZmxvd2NoYXJ0IFREXG4gICAgU3RhcnQoKHN0YXJ0KSktLT5cbiAgICBhY3Rpdml0eTFbYWN0aXZpdHkxXS0tPnx0aGVufGFjdGl2aXR5MlxuICAgIGFjdGl2aXR5MS0tPnxjYXRjaCB0aW1lb3V0fHRpbWVvdXRfaGFuZGxlclxuICAgIGFjdGl2aXR5MlthY3Rpdml0eTJdLS0+fHRoZW58YWN0aXZpdHkzXG4gICAgYWN0aXZpdHkyLS0+fGNhdGNoIHRpbWVvdXR8dGltZW91dF9oYW5kbGVyXG4gICAgYWN0aXZpdHkzW2FjdGl2aXR5M10tLT58dGhlbnxFbmQoKGVuZCkpXG4gICAgdGltZW91dF9oYW5kbGVyW3RpbWVvdXRfaGFuZGxlcl0tLT58dGhlbnxFbmQoKGVuZCkpIiwiYXV0b1N5bmMiOnRydWUsInJvdWdoIjpmYWxzZSwidXBkYXRlRGlhZ3JhbSI6dHJ1ZX0=?type=png"`;

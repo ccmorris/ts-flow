@@ -165,6 +165,68 @@ describe('toMermaid', () => {
 
     expect(result).toMatchSnapshot()
   })
+
+  test('should style a failed task red', () => {
+    const activities: TaskDefinitions = [
+      {
+        type: 'choice',
+        name: 'choice task',
+        fn: async () => {},
+        choices: { choice1: 'activity1', choice2: 'activity2' },
+      },
+      {
+        type: 'activity',
+        name: 'activity1',
+        fn: async () => {},
+        then: 'activity2',
+        catch: { timeout: { then: 'timeout_handler' } },
+      },
+      {
+        type: 'activity',
+        name: 'activity2',
+        fn: async () => {},
+        then: 'activity3',
+        catch: { timeout: { then: 'timeout_handler' } },
+      },
+      { type: 'activity', name: 'activity3', fn: async () => {}, then: null },
+      {
+        type: 'activity',
+        name: 'timeout_handler',
+        fn: async () => {},
+        then: null,
+      },
+    ]
+    const transitions: Transition[] = [
+      {
+        transitionName: '(start)',
+        from: null,
+        to: activities[0],
+        nextInput: 'input',
+      },
+      {
+        transitionName: 'choice1',
+        from: activities[0],
+        to: activities[1],
+        nextInput: 'input',
+      },
+      {
+        transitionName: 'then',
+        from: activities[1],
+        to: activities[2],
+        nextInput: 'input',
+      },
+    ]
+    const workflowResult: WorkflowResult = {
+      transitions,
+      success: false,
+      output: undefined,
+      context: {},
+    }
+
+    const result = toMermaid(activities, workflowResult)
+
+    expect(result).toMatchSnapshot()
+  })
 })
 
 describe('toMermaidLiveEdit', () => {

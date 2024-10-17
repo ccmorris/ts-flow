@@ -7,19 +7,12 @@ import type {
 
 const formatTaskId = (name: string): string => name.replaceAll(' ', '_')
 
-const formatActivityTaskName = (name: string, isTraced?: boolean): string => {
-  const formattedName = formatTaskId(name)
-  return `${formattedName}[${name}]${isTraced ? ':::traced' : ''}`
-}
-const formatChoiceTaskName = (name: string, isTraced?: boolean): string => {
-  const formattedName = formatTaskId(name)
-  return `${formattedName}{${name}}${isTraced ? ':::traced' : ''}`
-}
-
 export const toMermaid = (
   tasks: TaskDefinitions,
   result?: WorkflowResult
 ): string => {
+  const failedTaskName =
+    result?.success === false && result.transitions.at(-1)?.to?.name
   const tasksWithTraced = tasks.map((task) => {
     const tracedTask = result?.transitions?.find((transition) => {
       return transition.from?.name === task.name
@@ -28,6 +21,7 @@ export const toMermaid = (
       ...task,
       isTraced: !!tracedTask,
       tracedTaskName: tracedTask?.transitionName,
+      isFailed: task.name === failedTaskName,
     }
   })
   const lines = [
@@ -46,13 +40,25 @@ export const toMermaid = (
   if (result) {
     lines.push('classDef traced fill:green,stroke-width:4px;')
   }
+  if (result?.success === false) {
+    lines.push('classDef failed fill:#cc0000,stroke-width:4px;')
+  }
   return `${lines.join('\n    ')}`
 }
 
 const activityToMermaid = (
-  activity: ActivityDefinition & { isTraced: boolean; tracedTaskName?: string }
+  activity: ActivityDefinition & {
+    isTraced: boolean
+    tracedTaskName?: string
+    isFailed: boolean
+  }
 ): string => {
-  const from = formatActivityTaskName(activity.name, activity.isTraced)
+  const from = `${formatTaskId(activity.name)}[${activity.name}]`
+  const className = activity.isFailed
+    ? ':::failed'
+    : activity.isTraced
+    ? ':::traced'
+    : ''
   const isTracedPath = activity.tracedTaskName === 'then'
   const isTracedToEnd =
     activity.then === null && activity.tracedTaskName === '(end)'
@@ -60,7 +66,7 @@ const activityToMermaid = (
   const nextDestination = activity.then
     ? formatTaskId(activity.then)
     : 'End((end))'
-  const next = `${from}${nextArrow}|then|${nextDestination}`
+  const next = `${from}${className}${nextArrow}|then|${nextDestination}`
 
   const catchConfig = activity.catch
     ? Object.entries(activity.catch).map(([error, catchActivity]) => {
@@ -75,16 +81,25 @@ const activityToMermaid = (
 }
 
 const choiceToMermaid = (
-  choice: ChoiceDefinition & { isTraced: boolean; tracedTaskName?: string }
+  choice: ChoiceDefinition & {
+    isTraced: boolean
+    tracedTaskName?: string
+    isFailed: boolean
+  }
 ): string => {
   return `${Object.entries(choice.choices)
     .map(([key, target]) => {
+      const from = `${formatTaskId(choice.name)}{${choice.name}}`
+      const className = choice.isFailed
+        ? ':::failed'
+        : choice.isTraced
+        ? ':::traced'
+        : ''
       const isTracedToEnd = target === null && choice.tracedTaskName === '(end)'
       const isTracedPath = choice.tracedTaskName === key || isTracedToEnd
       const arrow = isTracedPath ? '==>' : '-->'
-      const from = formatChoiceTaskName(choice.name, choice.isTraced)
       const destination = formatTaskId(target ?? 'End((end))')
-      return `${from}${arrow}|${key}|${destination}`
+      return `${from}${className}${arrow}|${key}|${destination}`
     })
     .join('\n    ')}`
 }

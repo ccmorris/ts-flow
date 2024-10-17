@@ -2,6 +2,7 @@ import { describe, expect, mock, test } from 'bun:test'
 import type { ActivityContext, TaskDefinitions } from '../types'
 import { run } from '../run'
 import { log } from '../logger'
+import { WorkflowError } from '../errors'
 
 describe('run', () => {
   test('should run the tasks', async () => {
@@ -225,11 +226,26 @@ describe('run', () => {
     ]
     const input = 'input'
 
-    await expect(run(tasks, input)).rejects.toThrowError(
-      "Task with name 'doesnotexist' not found"
-    )
+    try {
+      await run(tasks, input)
+    } catch (e) {
+      expect(e).toBeInstanceOf(WorkflowError)
+      if (e instanceof WorkflowError) {
+        expect(e.message).toBe("Task with name 'doesnotexist' not found")
+        expect(e.workflowResult?.success).toBe(false)
+        expect(e.workflowResult?.transitions).toEqual([
+          {
+            transitionName: '(start)',
+            from: null,
+            to: tasks[0],
+            nextInput: input,
+          },
+        ])
+      }
+    }
 
     expect(startFn).toHaveBeenCalledTimes(1)
+    expect.hasAssertions()
   })
 
   test('throws an error when the next activity does not exist', async () => {
@@ -296,7 +312,9 @@ describe('run', () => {
     ]
     const input = 'input'
 
-    await expect(run(tasks, input)).rejects.toThrowError('Timeout')
+    await expect(run(tasks, input)).rejects.toThrow(
+      new WorkflowError('Error thrown in workflow: Timeout')
+    )
 
     expect(startFn).toHaveBeenCalledTimes(1)
   })
