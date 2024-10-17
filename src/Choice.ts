@@ -5,7 +5,7 @@ import type {
   WorkflowResult,
 } from './types'
 import { run } from './run'
-import { toMermaid } from './mermaid'
+import { toDiagramPngUrl, toMermaid } from './diagrams'
 import type { Activity } from './Activity'
 
 export class Choice<I, O> {
@@ -59,6 +59,9 @@ export class Choice<I, O> {
 
   public toMermaid(): string {
     return toMermaid(this.toTaskDefinitions())
+  }
+  public toPngUrl(workflowResult?: WorkflowResult): string {
+    return toDiagramPngUrl(this.toTaskDefinitions(), workflowResult)
   }
 }
 

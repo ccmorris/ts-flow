@@ -1,4 +1,4 @@
-import { toMermaidPngUrl } from './mermaid'
+import { toDiagramPngUrl } from './diagrams'
 import type { TaskDefinitions, WorkflowResult } from './types'
 
 export class WorkflowError extends Error {
@@ -32,6 +32,6 @@ export class WorkflowError extends Error {
     if (!this.tasks || !this.workflowResult) {
       return null
     }
-    return toMermaidPngUrl(this.tasks, this.workflowResult)
+    return toDiagramPngUrl(this.tasks, this.workflowResult)
   }
 }

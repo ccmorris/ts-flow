@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 
 import type { TaskDefinitions, Transition, WorkflowResult } from '../types'
-import { toMermaid, toMermaidLiveEdit, toMermaidPngUrl } from '../mermaid'
+import { toMermaid, toMermaidLiveEdit, toDiagramPngUrl } from '../diagrams'
 
 describe('toMermaid', () => {
   test('should generate a mermaid diagram', () => {
@@ -261,7 +261,7 @@ describe('toMermaidLiveEdit', () => {
   })
 })
 
-describe('toMermaidPngUrl', () => {
+describe('toDiagramPngUrl', () => {
   test('should generate a URL to a mermaid diagram PNG', () => {
     const activities: TaskDefinitions = [
       {
@@ -287,7 +287,7 @@ describe('toMermaidPngUrl', () => {
       },
     ]
 
-    const pngUrl = toMermaidPngUrl(activities)
+    const pngUrl = toDiagramPngUrl(activities)
 
     expect(pngUrl).toMatchSnapshot()
   })
@@ -348,7 +348,7 @@ describe('toMermaidPngUrl', () => {
       ],
     }
 
-    const pngUrl = toMermaidPngUrl(activities, workflowResult)
+    const pngUrl = toDiagramPngUrl(activities, workflowResult)
 
     expect(pngUrl).toMatchSnapshot()
   })

@@ -129,7 +129,7 @@ export const toMermaidLiveEdit = (
   const encodedState = encodeMermaidLiveState(mermaidString, 'dark')
   return `https://mermaid.live/edit#${encodedState}`
 }
-export const toMermaidPngUrl = (
+export const toDiagramPngUrl = (
   tasks: TaskDefinitions,
   result?: WorkflowResult
 ): string => {

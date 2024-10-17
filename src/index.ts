@@ -1,6 +1,6 @@
 export * from './Activity'
 export * from './Choice'
 export * from './errors'
-export * from './mermaid'
+export * from './diagrams'
 export * from './run'
 export * from './types'

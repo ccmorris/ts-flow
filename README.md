@@ -19,7 +19,7 @@ const workflow = start
 const result = await start.run('initial input', { val: 'initial context' })
 
 const workflowOutput = result.output
-const workflowDiagram = toMermaidPngUrl(start.toTaskDefinitions(), result)
+const workflowDiagram = start.toPngUrl(result)
 ```
 
 ## Development
