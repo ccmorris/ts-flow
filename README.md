@@ -8,6 +8,22 @@ This package is a work in progress and not yet published. Expect breaking change
 
 ## Usage
 
+```ts
+const start = new Activity('activity1', () => {})
+const workflow = start
+  .catch('Timeout', null)
+  .then(new Choice('choice1', () => {}))
+  .choice('option1', new Activity('activity2', () => {}))
+  .choice('option2', null)
+
+const result = await start.run('initial input', { val: 'initial context' })
+
+const workflowOutput = result.output
+const workflowDiagram = toMermaidPngUrl(start.toTaskDefinitions(), result)
+```
+
+## Development
+
 Install bun: <https://bun.sh>
 
 Install dependencies:
@@ -24,6 +40,7 @@ bun test
 
 ## Todo
 
+- Run a workflow using the chained output: eg. .run on the last task should start from the beginning
 - Expand README with more docs and examples
 - Write instructions for setting up automatic retries on AWS
 - Expand comments and docstrings
