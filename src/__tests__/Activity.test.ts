@@ -2,6 +2,7 @@ import { describe, expect, mock, test } from 'bun:test'
 
 import { Activity } from '../Activity'
 import { CatchInput } from '../types'
+import { Workflow } from '../Workflow'
 
 describe('Activity class', () => {
   test('should create an activity', () => {
@@ -84,7 +85,9 @@ describe('Activity class', () => {
 
     activity1.then(activity2).catch('Timeout', activity3)
 
-    const result = await activity1.run('initial input')
+    const result = await new Workflow({ startTask: activity1 }).run(
+      'initial input'
+    )
 
     expect(activity1.fn).toHaveBeenCalledTimes(1)
     expect(activity1.fn).toHaveBeenCalledWith(

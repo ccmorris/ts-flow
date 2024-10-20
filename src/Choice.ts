@@ -1,11 +1,4 @@
-import type {
-  TaskDefinitions,
-  ActivityFunction,
-  EndPointer,
-  WorkflowResult,
-} from './types'
-import { run } from './run'
-import { toDiagramPngUrl, toMermaid } from './diagrams'
+import type { TaskDefinitions, ActivityFunction, EndPointer } from './types'
 import type { Activity } from './Activity'
 
 export class Choice<I, O> {
@@ -51,17 +44,6 @@ export class Choice<I, O> {
         : []),
     ]
     return removeDuplicateTasks(tasks as TaskDefinitions)
-  }
-
-  public async run(initialInput: I): Promise<WorkflowResult> {
-    return run(this.toTaskDefinitions(), initialInput)
-  }
-
-  public toMermaid(): string {
-    return toMermaid(this.toTaskDefinitions())
-  }
-  public toPngUrl(workflowResult?: WorkflowResult): string {
-    return toDiagramPngUrl(this.toTaskDefinitions(), workflowResult)
   }
 }
 

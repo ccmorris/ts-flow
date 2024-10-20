@@ -2,6 +2,7 @@ import { describe, expect, mock, test } from 'bun:test'
 
 import { Choice } from '../Choice'
 import { Activity } from '../Activity'
+import { Workflow } from '../Workflow'
 
 describe('Choice class', () => {
   test('should create a choice', () => {
@@ -45,7 +46,9 @@ describe('Choice class', () => {
       .choice('decision1', activity1)
       .choice('decision2', activity2)
 
-    const result = await choice.run('initial input')
+    const result = await new Workflow({ startTask: choice }).run(
+      'initial input'
+    )
 
     expect(choice.fn).toHaveBeenCalledTimes(1)
     expect(choice.fn).toHaveBeenCalledWith('initial input', expect.any(Object))
