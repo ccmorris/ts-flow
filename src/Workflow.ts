@@ -13,8 +13,11 @@ export class Workflow<I> {
     this.startTask = startTask
   }
 
-  public async run(initialInput: I): Promise<WorkflowResult> {
-    return run(this.startTask.toTaskDefinitions(), initialInput)
+  public async run(
+    initialInput: I,
+    initialContext: Record<string, unknown> = {}
+  ): Promise<WorkflowResult> {
+    return run(this.startTask.toTaskDefinitions(), initialInput, initialContext)
   }
 
   public toMermaid(): string {

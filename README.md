@@ -9,12 +9,12 @@ This package is a work in progress and not yet published. Expect breaking change
 ## Usage
 
 ```ts
-const startTask = new Activity('activity1', () => {})
+const startTask = new Activity('activity1', async () => {})
 const workflow = new Workflow({ startTask })
 startTask
   .catch('Timeout', null)
-  .then(new Choice('choice1', () => {}))
-  .choice('option1', new Activity('activity2', () => {}))
+  .then(new Choice('choice1', async () => {}))
+  .choice('option1', new Activity('activity2', async () => {}))
   .choice('option2', null)
 
 const result = await workflow.run('initial input', { val: 'initial context' })
