@@ -1,8 +1,8 @@
-# ts-flow
+# ts-workflow
 
 > Workflow orchestration in TypeScript
 
-`npm i ts-flow` | `bun i ts-flow`
+`npm i ts-workflow` | `bun i ts-workflow`
 
 ## Features
 
@@ -18,6 +18,8 @@
 Example:
 
 ```ts
+import { Activity, Choice, Workflow } from 'ts-workflow'
+
 const startTask = new Activity('activity1', async () => {})
 const workflow = new Workflow({ startTask })
 startTask
