@@ -1,5 +1,5 @@
 {
-  "name": "ts-flow",
+  "name": "ts-workflow",
   "description": "Type-safe workflows for TypeScript",
   "version": "0.1.0",
   "module": "dist/index.js",
