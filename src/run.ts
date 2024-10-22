@@ -10,7 +10,7 @@ import { log } from './logger'
 import { WorkflowError } from './errors'
 
 /**
- * Run the workflow with an initial input
+ * Run the workflow with an initial input and initial context
  */
 export const run = async <InitialInput>(
   tasks: TaskDefinitions,

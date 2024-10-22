@@ -1,6 +1,18 @@
 import type { TaskDefinitions, ActivityFunction, EndPointer } from './types'
 import type { Activity } from './Activity'
 
+/**
+ * A choice is a branching point in a workflow.
+ * Define a function to determine the next activity based on the function output.
+ *
+ * @example
+ * new Choice('choice', async (input) => {
+ *   if (input === 'a') return 'a'
+ *   return 'other'
+ * })
+ * .choice('a', new Activity('activityA', async () => {}))
+ * .choice('other', new Activity('activityOther', async () => {}))
+ */
 export class Choice<I, O> {
   name: string
   fn: ActivityFunction<I, O>
@@ -14,6 +26,9 @@ export class Choice<I, O> {
     this.choices = {}
   }
 
+  /**
+   * Define a choice based on the function output.
+   */
   public choice(
     name: string,
     next: Activity<I, any> | Choice<I, any> | EndPointer

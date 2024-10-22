@@ -1,6 +1,7 @@
 {
   "name": "ts-flow",
-  "version": "0.0.0",
+  "description": "Type-safe workflows for TypeScript",
+  "version": "0.1.0",
   "module": "dist/index.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -17,5 +18,12 @@
     "test": "bun test",
     "type-check": "tsc --noEmit",
     "prepublishOnly": "rm -rf dist && bun run build"
-  }
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ccmorris/ts-flow.git"
+  },
+  "homepage": "https://github.com/ccmorris/ts-flow#readme",
+  "author": "Chris Morris <chris@ccmorris.ca>"
 }

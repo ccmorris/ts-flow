@@ -2,11 +2,20 @@
 
 > Workflow orchestration in TypeScript
 
-## Status
+`npm i ts-flow` | `bun i ts-flow`
 
-This package is a work in progress and not yet published. Expect breaking changes.
+## Features
+
+- Type safety for function inputs/outputs
+- Choice activities for more complex workflow decisions
+- Shared context data between tasks
+- Zero dependencies
+- Generate an image for the workflow (via mermaid diagram syntax)
+- Generate an image for a traced workflow to show the path taken
 
 ## Usage
+
+Example:
 
 ```ts
 const startTask = new Activity('activity1', async () => {})
@@ -23,6 +32,14 @@ const workflowOutput = result.output
 const workflowDiagram = workflow.toPngUrl(result)
 ```
 
+### Steps
+
+1. Define a starting task by creating a new Activity or a new Choice
+2. Create a workflow using the starting task
+3. Chain the remaining tasks using `.catch`, `.then`, and `.choice`
+4. Run the workflow with an initial input and an initial context
+5. (Optional) Log the workflow final output, and the traced workflow diagram
+
 ## Development
 
 Install bun: <https://bun.sh>
@@ -38,26 +55,3 @@ Run tests:
 ```bash
 bun test
 ```
-
-## Todo
-
-- Expand README with more docs and examples
-- Write instructions for setting up automatic retries on AWS
-- Expand comments and docstrings
-- Publish package
-- Github Actions
-- Improved type safety for context data: consider an input type generic from the run method and/or constructors
-- Measure the time for each task
-- Timeout handling
-  - Set a max timeout value
-  - Cancellable tasks using an AbortSignal?
-
-## Features
-
-- Type safety for function inputs/outputs
-- Declarative or imperative syntax
-- Generate an image for the workflow (via mermaid diagram syntax)
-- Generate an image for a traced workflow to show the path taken
-- Choice activities for more complex workflow decisions
-- Shared context data between tasks
-- Zero dependencies

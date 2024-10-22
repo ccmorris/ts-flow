@@ -7,6 +7,10 @@ import type {
 
 const formatTaskId = (name: string): string => name.replaceAll(' ', '_')
 
+/**
+ * Convert a list of task definitions to a Mermaid flowchart definition.
+ * Provide a workflow result to highlight the traced path.
+ */
 export const toMermaid = (
   tasks: TaskDefinitions,
   result?: WorkflowResult
@@ -121,6 +125,10 @@ const encodeMermaidLiveState = (
   return `base64:${base64Encoded}`
 }
 
+/**
+ * Convert a list of task definitions to a Mermaid flowchart definition
+ * and return a URL to the Mermaid Live editor.
+ */
 export const toMermaidLiveEdit = (
   tasks: TaskDefinitions,
   result?: WorkflowResult
@@ -129,6 +137,11 @@ export const toMermaidLiveEdit = (
   const encodedState = encodeMermaidLiveState(mermaidString, 'dark')
   return `https://mermaid.live/edit#${encodedState}`
 }
+
+/**
+ * Convert a list of task definitions to a PNG image URL using Mermaid diagrams.
+ * Provide a workflow result to highlight the traced path.
+ */
 export const toDiagramPngUrl = (
   tasks: TaskDefinitions,
   result?: WorkflowResult

@@ -6,6 +6,10 @@ import type {
 } from './types'
 import type { Choice } from './Choice'
 
+/**
+ * An activity is a single unit of work in a workflow.
+ * Define an async function, and chain activities together to create a workflow.
+ */
 export class Activity<I, O> {
   name: string
   fn: ActivityFunction<I, O>
@@ -24,11 +28,23 @@ export class Activity<I, O> {
     this.fn = fn
   }
 
+  /**
+   * Chain another activity or choice to run after this one, when successful.
+   */
   public then<T extends Activity<O, any> | Choice<O, any>>(next: T): T {
     this.next = next
     return next
   }
 
+  /**
+   * Chain a catch activity or choice to run after this one, when an error occurs.
+   *
+   * @example Catch an ErrorName and run an activity:
+   * activity.catch('ErrorName', new Activity('activity', async () => {}))
+   *
+   * @example Catch an ErrorName and end the workflow as a success:
+   * activity.catch('ErrorName', null)
+   */
   public catch<CatchKey extends string>(
     error: CatchKey,
     next:
@@ -40,6 +56,9 @@ export class Activity<I, O> {
     return this
   }
 
+  /**
+   * Convert the activity and any chained activities to a list of task definitions.
+   */
   public toTaskDefinitions(): TaskDefinitions {
     const tasks = [
       {
