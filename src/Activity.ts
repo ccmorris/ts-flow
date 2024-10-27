@@ -3,6 +3,7 @@ import type {
   ActivityFunction,
   EndPointer,
   CatchInput,
+  ActivityContext,
 } from './types'
 import type { Choice } from './Choice'
 
@@ -10,20 +11,20 @@ import type { Choice } from './Choice'
  * An activity is a single unit of work in a workflow.
  * Define an async function, and chain activities together to create a workflow.
  */
-export class Activity<I, O> {
+export class Activity<I, O, C extends ActivityContext> {
   name: string
-  fn: ActivityFunction<I, O>
-  next?: Activity<O, unknown> | Choice<O, unknown> | EndPointer
+  fn: ActivityFunction<I, O, C>
+  next?: Activity<O, unknown, C> | Choice<O, unknown, C> | EndPointer
   catchConfig?: {
     [key: string]: {
       then:
-        | Activity<CatchInput<any>, unknown>
-        | Choice<CatchInput<any>, unknown>
+        | Activity<CatchInput<any>, unknown, C>
+        | Choice<CatchInput<any>, unknown, C>
         | EndPointer
     }
   }
 
-  public constructor(name: string, fn: ActivityFunction<I, O>) {
+  public constructor(name: string, fn: ActivityFunction<I, O, C>) {
     this.name = name
     this.fn = fn
   }
@@ -31,7 +32,7 @@ export class Activity<I, O> {
   /**
    * Chain another activity or choice to run after this one, when successful.
    */
-  public then<T extends Activity<O, any> | Choice<O, any>>(next: T): T {
+  public then<T extends Activity<O, any, C> | Choice<O, any, C>>(next: T): T {
     this.next = next
     return next
   }
@@ -48,8 +49,8 @@ export class Activity<I, O> {
   public catch<CatchKey extends string>(
     error: CatchKey,
     next:
-      | Activity<CatchInput<CatchKey>, any>
-      | Choice<CatchInput<CatchKey>, any>
+      | Activity<CatchInput<CatchKey>, any, C>
+      | Choice<CatchInput<CatchKey>, any, C>
       | EndPointer
   ) {
     this.catchConfig = { ...this.catchConfig, [error]: { then: next } }

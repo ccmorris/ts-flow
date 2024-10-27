@@ -1,4 +1,9 @@
-import type { TaskDefinitions, ActivityFunction, EndPointer } from './types'
+import type {
+  TaskDefinitions,
+  ActivityFunction,
+  EndPointer,
+  ActivityContext,
+} from './types'
 import type { Activity } from './Activity'
 
 /**
@@ -13,11 +18,11 @@ import type { Activity } from './Activity'
  * .choice('a', new Activity('activityA', async () => {}))
  * .choice('other', new Activity('activityOther', async () => {}))
  */
-export class Choice<I, O> {
+export class Choice<I, O, C extends ActivityContext> {
   name: string
   fn: ActivityFunction<I, O>
   choices: {
-    [key: string]: Activity<I, any> | Choice<I, any> | EndPointer
+    [key: string]: Activity<I, any, C> | Choice<I, any, C> | EndPointer
   }
 
   public constructor(name: string, fn: ActivityFunction<I, O>) {
@@ -31,7 +36,7 @@ export class Choice<I, O> {
    */
   public choice(
     name: string,
-    next: Activity<I, any> | Choice<I, any> | EndPointer
+    next: Activity<I, any, C> | Choice<I, any, C> | EndPointer
   ) {
     this.choices = { ...this.choices, [name]: next }
     return this

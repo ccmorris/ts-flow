@@ -86,7 +86,8 @@ describe('Activity class', () => {
     activity1.then(activity2).catch('Timeout', activity3)
 
     const result = await new Workflow({ startTask: activity1 }).run(
-      'initial input'
+      'initial input',
+      {}
     )
 
     expect(activity1.fn).toHaveBeenCalledTimes(1)

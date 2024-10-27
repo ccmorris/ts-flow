@@ -6,7 +6,7 @@
 
 ## Features
 
-- Type safety for function inputs/outputs
+- Type safety for function inputs/outputs and shared context data
 - Choice activities for more complex workflow decisions
 - Shared context data between tasks
 - Zero dependencies
@@ -18,9 +18,14 @@
 Example:
 
 ```ts
-import { Activity, Choice, Workflow } from 'ts-workflow'
+import { Activity, Choice, Workflow, WorkflowError } from 'ts-workflow'
 
-const startTask = new Activity('activity1', async () => {})
+// Define the workflow
+type MyContext = { sharedValue: string }
+const startTask = new Activity(
+  'activity1',
+  async (input: string, context: MyContext) => {}
+)
 const workflow = new Workflow({ startTask })
 startTask
   .catch('Timeout', null)
@@ -28,8 +33,22 @@ startTask
   .choice('option1', new Activity('activity2', async () => {}))
   .choice('option2', null)
 
-const result = await workflow.run('initial input', { val: 'initial context' })
+// Run the workflow
+const result = await workflow
+  .run('initial input', {
+    sharedValue: 'initial context',
+  })
+  .catch((error) => {
+    if (error instanceof WorkflowError) {
+      console.error(error.message, {
+        output: error.workflowResult?.output,
+        diagram: workflow.toPngUrl(error.workflowResult),
+      })
+    }
+    throw error
+  })
 
+// Output the results
 const workflowOutput = result.output
 const workflowDiagram = workflow.toPngUrl(result)
 ```

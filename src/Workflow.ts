@@ -2,19 +2,21 @@ import type { Activity } from './Activity'
 import type { Choice } from './Choice'
 import { toDiagramPngUrl, toMermaid } from './diagrams'
 import { run } from './run'
-import type { WorkflowResult } from './types'
+import type { ActivityContext, WorkflowResult } from './types'
 
-export type Task<I, O> = Activity<I, O> | Choice<I, O>
+export type Task<I, O, C extends ActivityContext> =
+  | Activity<I, O, C>
+  | Choice<I, O, C>
 
 /**
  * A workflow is a collection of tasks that can be run together.
  *
  * The workflow can be run from the starting task with an initial input and initial context.
  */
-export class Workflow<I> {
-  startTask: Task<I, any>
+export class Workflow<I, C extends ActivityContext> {
+  startTask: Task<I, any, C>
 
-  constructor({ startTask }: { startTask: Task<I, any> }) {
+  constructor({ startTask }: { startTask: Task<I, any, C> }) {
     this.startTask = startTask
   }
 
@@ -23,7 +25,7 @@ export class Workflow<I> {
    */
   public async run(
     initialInput: I,
-    initialContext: Record<string, unknown> = {}
+    initialContext: C
   ): Promise<WorkflowResult> {
     return run(this.startTask.toTaskDefinitions(), initialInput, initialContext)
   }

@@ -9,10 +9,11 @@ export type CatchDefinition = {
 
 export type ActivityContext = Record<string, unknown>
 
-export type ActivityFunction<I = unknown, O = unknown> = (
-  input: I,
-  context: ActivityContext
-) => Promise<O>
+export type ActivityFunction<
+  I = unknown,
+  O = unknown,
+  C extends ActivityContext = {}
+> = (input: I, context: C) => Promise<O>
 
 export type ActivityDefinition<I = unknown, O = unknown> = {
   type: 'activity'
