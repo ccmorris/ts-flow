@@ -1,7 +1,7 @@
 {
   "name": "ts-workflow",
   "description": "Type-safe workflows for TypeScript",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "module": "dist/index.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
