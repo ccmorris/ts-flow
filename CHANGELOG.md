@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Type safe shared contexts
 
+## [0.2.0] - 2024-10-26
+
+- Type safe shared context data
+
 ## [0.1.0] - 2024-10-21
 
 - Define workflows using chained methods
